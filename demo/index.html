@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cổng vận hành - Bản demo</title>
-<meta name="description" content="Bản demo portal quản lý vận hành nội bộ: giao việc, duyệt yêu cầu, theo dõi thanh toán và báo cáo tiến độ. Dữ liệu mẫu.">
+<title>Cổng vận hành sự kiện - Bản demo</title>
+<meta name="description" content="Bản demo portal vận hành sự kiện nội bộ: checklist trước, trong và sau sự kiện, nhắc hạn tự động, phân quyền theo vai trò, hồ sơ chuẩn hóa. Dữ liệu mẫu.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
@@ -59,7 +59,7 @@ body {
   line-height: 1.55;
   font-variant-numeric: tabular-nums;
 }
-button { font: inherit; color: inherit; }
+button, select { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 
 .demo-strip {
@@ -72,7 +72,7 @@ button { font: inherit; color: inherit; }
   padding: 2px 10px; cursor: pointer; white-space: nowrap;
 }
 
-.app { display: grid; grid-template-columns: 232px 1fr; min-height: calc(100vh - 38px); }
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 38px); }
 
 .rail {
   background: var(--panel); border-right: 1px solid var(--line);
@@ -93,11 +93,15 @@ button { font: inherit; color: inherit; }
   text-align: center; background: var(--amber-wash); color: var(--amber); font-weight: 500;
 }
 .badge.late { background: var(--brick-wash); color: var(--brick); }
-.badge:empty { display: none; }
 .who { margin-top: auto; padding: 0 10px; font-size: 13px; color: var(--ink-soft); }
-.who b { display: block; color: var(--ink); font-weight: 500; }
+.who label { display: block; margin-bottom: 4px; }
+.who b { display: block; color: var(--ink); font-weight: 500; margin-top: 8px; }
+select {
+  width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px;
+  background: var(--panel); cursor: pointer;
+}
 
-main { padding: 28px 32px 56px; max-width: 1080px; width: 100%; }
+main { padding: 28px 32px 56px; max-width: 1120px; width: 100%; }
 .page-head { margin-bottom: 22px; }
 .page-head h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; }
 .page-head p { margin: 4px 0 0; color: var(--ink-soft); }
@@ -105,7 +109,7 @@ main { padding: 28px 32px 56px; max-width: 1080px; width: 100%; }
 h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
 .panel + .panel { margin-top: 20px; }
-.panel-head { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 18px 0; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 18px 0; }
 .panel-head h2 { margin: 0; }
 .panel-head span { color: var(--ink-soft); font-size: 13px; }
 
@@ -118,7 +122,9 @@ h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
 .row-title { font-weight: 500; }
 .row-meta { color: var(--ink-soft); font-size: 13px; }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.row.done .row-title { color: var(--ink-soft); font-weight: 400; }
 .empty { padding: 22px 18px 24px; color: var(--ink-soft); }
+.note { padding: 12px 18px 16px; color: var(--ink-soft); font-size: 13px; border-top: 1px solid var(--line); }
 
 .btn {
   border: 1px solid var(--line); background: var(--panel); border-radius: 5px;
@@ -131,13 +137,13 @@ h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
   :root:not([data-theme="light"]) .btn.primary { color: #10201b; }
 }
 
-.chip { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.chip { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 12px; font-weight: 500; vertical-align: 1px; }
 .chip.cho { background: var(--amber-wash); color: var(--amber); }
 .chip.ok { background: var(--pine-wash); color: var(--pine-dark); }
 .chip.late { background: var(--brick-wash); color: var(--brick); }
 .chip.off { background: var(--paper); color: var(--ink-soft); border: 1px solid var(--line); }
 
-.overview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr); gap: 20px; align-items: start; }
+.overview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr); gap: 20px; align-items: start; margin-bottom: 20px; }
 .overview .panel + .panel { margin-top: 0; }
 .stats { margin: 0; padding: 8px 18px 12px; }
 .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
@@ -147,7 +153,7 @@ h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
 .stats dd.warn { color: var(--brick); }
 
 .bars { padding: 12px 18px 16px; display: grid; gap: 12px; }
-.bar-row { display: grid; grid-template-columns: 130px 1fr 64px; gap: 12px; align-items: center; }
+.bar-row { display: grid; grid-template-columns: 220px 1fr 72px; gap: 12px; align-items: center; }
 .bar-label { color: var(--ink-soft); font-size: 14px; }
 .bar-val { text-align: right; font-weight: 500; }
 .bar-track { display: flex; height: 12px; background: var(--paper); border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
@@ -155,7 +161,18 @@ h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 0 18px 16px; font-size: 13px; color: var(--ink-soft); }
 .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
 
-.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.ev-list { list-style: none; margin: 0; padding: 6px 8px 8px; }
+.ev-list button {
+  display: grid; grid-template-columns: 1fr 150px; gap: 6px 16px; align-items: center; width: 100%;
+  text-align: left; background: none; border: 0; border-radius: 6px; padding: 11px 10px; cursor: pointer;
+}
+.ev-list button:hover { background: var(--paper); }
+.ev-list button[aria-current="true"] { background: var(--pine-wash); }
+.ev-name { font-weight: 500; }
+.ev-meta { color: var(--ink-soft); font-size: 13px; }
+.ev-prog { display: grid; gap: 4px; font-size: 13px; color: var(--ink-soft); }
+
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; margin-top: 20px; }
 .board .panel + .panel { margin-top: 0; }
 .board .rows { padding-top: 2px; }
 .board .row { grid-template-columns: 1fr; }
@@ -167,6 +184,17 @@ h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
   cursor: pointer; color: var(--ink-soft);
 }
 .tabs button[aria-selected="true"] { color: var(--pine-dark); border-bottom-color: var(--pine); font-weight: 500; }
+
+.toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.toolbar select { width: auto; min-width: 260px; }
+.path { color: var(--ink-soft); font-size: 13px; }
+
+.folders { list-style: none; margin: 0; padding: 4px 18px 12px; }
+.folders > li { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.folders > li:last-child { border-bottom: 0; }
+.folder-name { font-weight: 500; display: flex; justify-content: space-between; gap: 12px; }
+.files { list-style: none; margin: 6px 0 0; padding: 0 0 0 18px; color: var(--ink-soft); font-size: 14px; }
+.files li { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
 
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 12px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
@@ -191,15 +219,20 @@ tbody tr:last-child td { border-bottom: 0; }
 @media (max-width: 760px) {
   .app { grid-template-columns: 1fr; }
   .rail { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
-  .brand small, .who { display: none; }
+  .brand small { display: none; }
   .brand { padding: 0 6px 0 0; white-space: nowrap; }
   .nav { flex-direction: row; }
   .nav button { white-space: nowrap; }
+  .who { margin: 0; min-width: 150px; }
+  .who b { display: none; }
+  .who label { display: none; }
   main { padding: 20px 16px 48px; }
-  .bar-row { grid-template-columns: 1fr 56px; }
+  .bar-row { grid-template-columns: 1fr 64px; }
   .bar-row .bar-track { grid-column: 1 / -1; grid-row: 2; }
   .row { grid-template-columns: 1fr; }
   .row-actions { justify-content: flex-start; }
+  .ev-list button { grid-template-columns: 1fr; }
+  .toolbar select { min-width: 0; width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .toast { transition: none; }
@@ -209,15 +242,23 @@ tbody tr:last-child td { border-bottom: 0; }
 <body>
 
 <div class="demo-strip" role="note">
-  <span>Bản demo với dữ liệu mẫu. Mọi thao tác chỉ diễn ra trên trình duyệt của bạn.</span>
+  <span>Bản demo với dữ liệu mẫu. Mọi thao tác chỉ diễn ra trên trình duyệt của bạn. Đổi vai trò ở cuối thanh bên để xem mỗi cấp thấy gì.</span>
   <button type="button" data-act="reset">Đặt lại dữ liệu mẫu</button>
 </div>
 
 <div class="app">
   <aside class="rail">
-    <div class="brand">Cổng vận hành<small>Công ty Mẫu</small></div>
+    <div class="brand">Cổng vận hành sự kiện<small>Công ty Mẫu</small></div>
     <nav class="nav" id="nav" aria-label="Điều hướng chính"></nav>
-    <div class="who"><b>Phương Linh</b>Quản lý vận hành</div>
+    <div class="who">
+      <label for="role">Xem với vai trò</label>
+      <select id="role">
+        <option value="head">Trưởng phòng</option>
+        <option value="staff">Nhân viên</option>
+        <option value="ctv">Cộng tác viên</option>
+      </select>
+      <b id="who-name"></b>
+    </div>
   </aside>
   <main id="main" tabindex="-1"></main>
 </div>
@@ -227,26 +268,80 @@ tbody tr:last-child td { border-bottom: 0; }
 <script>
 "use strict";
 
-/* Dữ liệu mẫu: toàn bộ tên người, nhà cung cấp và số liệu đều là hư cấu. */
+/* Dữ liệu mẫu: toàn bộ tên người, sự kiện, nhà cung cấp và số liệu đều là hư cấu. */
+
+const DAY = 86400000;
+const TODAY = new Date();
+TODAY.setHours(0, 0, 0, 0);
+const addDays = (n) => new Date(TODAY.getTime() + n * DAY);
+const fmt = (n) => addDays(n).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+
+const ROLES = {
+  head: { label: "Trưởng phòng", name: "Phương Linh", home: "tong-quan" },
+  staff: { label: "Nhân viên", name: "Minh Anh", home: "su-kien" },
+  ctv: { label: "Cộng tác viên", name: "Hải Yến", home: "viec" }
+};
+
+/* offset: số ngày từ hôm nay đến ngày diễn ra sự kiện (âm = đã diễn ra) */
+const EVENTS = [
+  { id: 1, name: "Hội thảo hướng nghiệp tháng 11", place: "Hội trường A", offset: 14, lead: "Minh Anh", ctv: "Hải Yến" },
+  { id: 2, name: "Ngày hội việc làm sinh viên", place: "Sân trường B", offset: 3, lead: "Quốc Bảo", ctv: "Văn Khoa" },
+  { id: 3, name: "Workshop kỹ năng phỏng vấn", place: "Phòng đào tạo C", offset: 0, lead: "Minh Anh", ctv: "Hải Yến" },
+  { id: 4, name: "Talkshow gặp gỡ nhà tuyển dụng", place: "Hội trường D", offset: -6, lead: "Quốc Bảo", ctv: "Văn Khoa" }
+];
+
+const PHASES = [
+  { k: "truoc", label: "Trước sự kiện" },
+  { k: "trong", label: "Trong sự kiện" },
+  { k: "sau", label: "Sau sự kiện" }
+];
+
+/* off: hạn so với ngày diễn ra; who: người phụ trách */
+const TEMPLATE = [
+  { phase: "truoc", text: "Chốt kịch bản và timeline", off: -10, who: "lead" },
+  { phase: "truoc", text: "Xác nhận nhà cung cấp sân khấu và âm thanh", off: -7, who: "lead" },
+  { phase: "truoc", text: "Gửi thư mời và xác nhận khách mời", off: -5, who: "ctv" },
+  { phase: "truoc", text: "In ấn tài liệu và standee", off: -2, who: "ctv" },
+  { phase: "trong", text: "Đón khách và check-in", off: 0, who: "ctv" },
+  { phase: "trong", text: "Giám sát chương trình theo timeline", off: 0, who: "lead" },
+  { phase: "trong", text: "Chụp ảnh và quay tư liệu", off: 0, who: "ctv" },
+  { phase: "sau", text: "Tổng hợp phản hồi của khách tham dự", off: 2, who: "lead" },
+  { phase: "sau", text: "Nộp hồ sơ thanh toán nhà cung cấp", off: 3, who: "head" },
+  { phase: "sau", text: "Báo cáo kết quả sự kiện", off: 5, who: "lead" }
+];
+
+const FOLDERS = [
+  { name: "Kế hoạch và kịch bản", files: ["Kịch bản chương trình", "Timeline chi tiết", "Dự trù ngân sách"], roles: ["head", "staff"] },
+  { name: "Nhà cung cấp", files: ["Báo giá", "Hợp đồng", "Biên bản nghiệm thu"], roles: ["head", "staff"] },
+  { name: "Truyền thông", files: ["Thư mời", "Thiết kế standee", "Bài đăng"], roles: ["head", "staff", "ctv"] },
+  { name: "Hiện trường", files: ["Danh sách check-in", "Ảnh sự kiện", "Video tư liệu"], roles: ["head", "staff", "ctv"] },
+  { name: "Báo cáo và thanh toán", files: ["Báo cáo kết quả", "Hồ sơ thanh toán"], roles: ["head", "staff"] }
+];
+
+function buildItems() {
+  const items = [];
+  let id = 1;
+  EVENTS.forEach((e) => {
+    TEMPLATE.forEach((t, i) => {
+      const due = e.offset + t.off;
+      items.push({
+        id: id++, ev: e.id, phase: t.phase, text: t.text, due,
+        owner: t.who === "lead" ? e.lead : t.who === "ctv" ? e.ctv : ROLES.head.name,
+        done: due < -1 ? (e.id + i) % 4 !== 0 : false
+      });
+    });
+  });
+  return items;
+}
+
 const SEED = {
-  members: ["Minh Anh", "Quốc Bảo", "Thu Hà", "Đức Long"],
-  tasks: [
-    { id: 1, title: "Chốt kịch bản và timeline sự kiện tháng 11", owner: "Minh Anh", due: "12/10", status: "doing", late: false },
-    { id: 2, title: "Đối chiếu báo giá in ấn với ngân sách", owner: "Quốc Bảo", due: "08/10", status: "todo", late: true },
-    { id: 3, title: "Xác nhận danh sách khách mời đợt 2", owner: "Thu Hà", due: "14/10", status: "doing", late: false },
-    { id: 4, title: "Cập nhật checklist hậu cần", owner: "Đức Long", due: "15/10", status: "todo", late: false },
-    { id: 5, title: "Gửi biên bản họp tuần cho cả team", owner: "Thu Hà", due: "07/10", status: "done", late: false },
-    { id: 6, title: "Chuẩn bị tài liệu cho buổi đào tạo", owner: "Minh Anh", due: "20/10", status: "todo", late: false },
-    { id: 7, title: "Kiểm tra thiết bị âm thanh ánh sáng", owner: "Đức Long", due: "09/10", status: "doing", late: true },
-    { id: 8, title: "Tổng hợp phản hồi sau sự kiện trước", owner: "Quốc Bảo", due: "05/10", status: "done", late: false },
-    { id: 9, title: "Làm hợp đồng với nhà cung cấp sân khấu", owner: "Thu Hà", due: "10/10", status: "todo", late: false }
-  ],
+  items: buildItems(),
   approvals: [
     { id: 1, title: "Mua vật tư in ấn đợt 2", by: "Quốc Bảo", kind: "Chi phí", amount: 18500000, status: "cho" },
-    { id: 2, title: "Thuê thêm 2 nhân sự hỗ trợ ngày sự kiện", by: "Đức Long", kind: "Nhân sự", amount: 6000000, status: "cho" },
+    { id: 2, title: "Thuê thêm 2 nhân sự hỗ trợ ngày sự kiện", by: "Văn Khoa", kind: "Nhân sự", amount: 6000000, status: "cho" },
     { id: 3, title: "Đổi địa điểm họp đối tác sang phòng lớn hơn", by: "Minh Anh", kind: "Cơ sở vật chất", amount: 0, status: "cho" },
-    { id: 4, title: "Tăng ngân sách quà tặng khách mời", by: "Thu Hà", kind: "Chi phí", amount: 4200000, status: "cho" },
-    { id: 5, title: "Nghỉ phép 2 ngày sau sự kiện", by: "Đức Long", kind: "Nhân sự", amount: 0, status: "ok" },
+    { id: 4, title: "Tăng ngân sách quà tặng khách mời", by: "Minh Anh", kind: "Chi phí", amount: 4200000, status: "cho" },
+    { id: 5, title: "Nghỉ phép 2 ngày sau sự kiện", by: "Hải Yến", kind: "Nhân sự", amount: 0, status: "ok" },
     { id: 6, title: "Gia hạn hợp đồng thuê thiết bị", by: "Quốc Bảo", kind: "Chi phí", amount: 9800000, status: "no" }
   ],
   payments: [
@@ -261,7 +356,10 @@ const SEED = {
 };
 
 let S = structuredClone(SEED);
-let view = "tong-quan";
+let role = "head";
+let view = ROLES.head.home;
+let selEv = 1;
+let docEv = 1;
 let apFilter = "cho";
 let payFilter = "all";
 
@@ -270,100 +368,192 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 const vnd = (n) => n.toLocaleString("vi-VN") + " đ";
 const mil = (n) => (n / 1000000).toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + " triệu";
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const evById = (id) => EVENTS.find((e) => e.id === id);
+const me = () => ROLES[role].name;
 
-const TASK_COLS = [
-  { key: "todo", label: "Cần làm", next: "doing", verb: "Bắt đầu" },
-  { key: "doing", label: "Đang làm", next: "done", verb: "Hoàn thành" },
-  { key: "done", label: "Hoàn thành", next: "todo", verb: "Mở lại" }
-];
 const AP_LABEL = { cho: "Chờ duyệt", ok: "Đã duyệt", no: "Đã từ chối" };
 const AP_CHIP = { cho: "cho", ok: "ok", no: "off" };
 const PAY_LABEL = { cho: "Chờ chi", late: "Quá hạn", ok: "Đã chi" };
 const PAY_CHIP = { cho: "cho", late: "late", ok: "ok" };
 
+/* ---------- Truy vấn theo vai trò ---------- */
+
 const pending = () => S.approvals.filter((a) => a.status === "cho");
-const lateTasks = () => S.tasks.filter((t) => t.late && t.status !== "done");
 const latePays = () => S.payments.filter((p) => p.status === "late");
 const sumPay = (st) => S.payments.filter((p) => p.status === st).reduce((n, p) => n + p.amount, 0);
+const lateItems = (list) => list.filter((i) => !i.done && i.due < 0);
+const myItems = () => S.items.filter((i) => i.owner === me());
 
-/* ---------- Giao diện ---------- */
+function visibleEvents() {
+  if (role === "head") return EVENTS;
+  if (role === "staff") return EVENTS.filter((e) => e.lead === me());
+  return EVENTS.filter((e) => S.items.some((i) => i.ev === e.id && i.owner === me()));
+}
+function itemsOfEvent(id) {
+  const list = S.items.filter((i) => i.ev === id);
+  return role === "ctv" ? list.filter((i) => i.owner === me()) : list;
+}
+
+/* ---------- Thành phần giao diện ---------- */
 
 const NAV = [
-  { id: "tong-quan", label: "Tổng quan" },
-  { id: "cong-viec", label: "Công việc", badge: () => lateTasks().length, late: true },
-  { id: "phe-duyet", label: "Phê duyệt", badge: () => pending().length },
-  { id: "thanh-toan", label: "Thanh toán", badge: () => latePays().length, late: true },
-  { id: "bao-cao", label: "Báo cáo" }
+  { id: "tong-quan", label: "Tổng quan", roles: ["head"] },
+  { id: "su-kien", label: "Sự kiện", roles: ["head", "staff"] },
+  { id: "viec", label: "Việc của tôi", roles: ["head", "staff", "ctv"], badge: () => lateItems(myItems()).length, late: true },
+  { id: "tai-lieu", label: "Tài liệu", roles: ["head", "staff", "ctv"] },
+  { id: "phe-duyet", label: "Phê duyệt", roles: ["head"], badge: () => pending().length },
+  { id: "thanh-toan", label: "Thanh toán", roles: ["head"], badge: () => latePays().length, late: true },
+  { id: "bao-cao", label: "Báo cáo", roles: ["head"] }
 ];
 
 function renderNav() {
-  $("#nav").innerHTML = NAV.map((n) => {
+  $("#nav").innerHTML = NAV.filter((n) => n.roles.includes(role)).map((n) => {
     const count = n.badge ? n.badge() : 0;
     const badge = count ? `<span class="badge${n.late ? " late" : ""}">${count}</span>` : "";
     return `<button type="button" data-view="${n.id}"${n.id === view ? ' aria-current="page"' : ""}>${esc(n.label)}${badge}</button>`;
   }).join("");
+  $("#role").value = role;
+  $("#who-name").textContent = `${ROLES[role].name}, ${ROLES[role].label.toLowerCase()}`;
 }
 
-function head(title, sub) {
-  return `<div class="page-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`;
+const head = (title, sub) => `<div class="page-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`;
+
+function dueChip(it) {
+  if (it.done) return '<span class="chip ok">Đã xong</span>';
+  if (it.due < 0) return `<span class="chip late">Trễ ${-it.due} ngày</span>`;
+  if (it.due === 0) return '<span class="chip cho">Hôm nay</span>';
+  if (it.due <= 2) return `<span class="chip cho">Còn ${it.due} ngày</span>`;
+  return `<span class="chip off">Hạn ${fmt(it.due)}</span>`;
+}
+
+function eventChip(e) {
+  if (e.offset > 0) return `<span class="chip off">Còn ${e.offset} ngày</span>`;
+  if (e.offset === 0) return '<span class="chip ok">Diễn ra hôm nay</span>';
+  return '<span class="chip off">Đã diễn ra</span>';
+}
+
+function itemRow(it, showEvent) {
+  const ev = evById(it.ev);
+  return `<li class="row${it.done ? " done" : ""}"><div><div class="row-title">${esc(it.text)} ${dueChip(it)}</div>
+    <div class="row-meta">${showEvent ? esc(ev.name) + " · " : ""}${esc(it.owner)} · ${fmt(it.due)}</div></div>
+    <div class="row-actions"><button class="btn${it.done ? "" : " primary"}" data-act="toggle" data-id="${it.id}">${it.done ? "Mở lại" : "Hoàn thành"}</button></div></li>`;
 }
 
 function queueRow(kind, title, meta, actions) {
   return `<li class="row"><div><div class="row-title">${esc(title)}</div><div class="row-meta">${esc(kind)} · ${esc(meta)}</div></div><div class="row-actions">${actions}</div></li>`;
 }
 
+function evProgress(id) {
+  const list = S.items.filter((i) => i.ev === id);
+  const done = list.filter((i) => i.done).length;
+  return { done, total: list.length, late: lateItems(list).length };
+}
+
+function progressBar(done, total, late) {
+  const lateN = late || 0;
+  return `<div class="bar-track" aria-hidden="true"><i style="width:${pct(done, total)}%;background:var(--bar-done)"></i><i style="width:${pct(lateN, total)}%;background:var(--bar-late)"></i></div>`;
+}
+
+/* ---------- Các màn hình ---------- */
+
 function viewOverview() {
   const today = new Date().toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long" });
-  const items = [];
-  pending().forEach((a) => items.push(queueRow("Cần duyệt", a.title, `${a.by}${a.amount ? " · " + vnd(a.amount) : ""}`,
+  const queue = [];
+  pending().forEach((a) => queue.push(queueRow("Cần duyệt", a.title, `${a.by}${a.amount ? " · " + vnd(a.amount) : ""}`,
     `<button class="btn primary" data-act="approve" data-id="${a.id}">Duyệt</button><button class="btn" data-act="reject" data-id="${a.id}">Từ chối</button>`)));
-  latePays().forEach((p) => items.push(queueRow("Thanh toán quá hạn", `${p.vendor} (${p.ref})`, `${vnd(p.amount)} · hạn ${p.due}`,
+  latePays().forEach((p) => queue.push(queueRow("Thanh toán quá hạn", `${p.vendor} (${p.ref})`, `${vnd(p.amount)} · hạn ${p.due}`,
     `<button class="btn primary" data-act="pay" data-id="${p.id}">Đánh dấu đã chi</button>`)));
-  lateTasks().forEach((t) => items.push(queueRow("Việc trễ hạn", t.title, `${t.owner} · hạn ${t.due}`,
-    `<button class="btn" data-act="remind" data-id="${t.id}">Nhắc ${esc(t.owner)}</button>`)));
+  lateItems(S.items).forEach((i) => queue.push(queueRow("Việc trễ hạn", i.text, `${evById(i.ev).name} · ${i.owner} · trễ ${-i.due} ngày`,
+    `<button class="btn" data-act="remind" data-id="${i.id}">Nhắc ${esc(i.owner)}</button>`)));
+  const shown = queue.slice(0, 8);
 
-  const open = S.tasks.filter((t) => t.status !== "done");
-  const load = S.members.map((m) => ({ m, n: open.filter((t) => t.owner === m).length }));
-  const maxLoad = Math.max(1, ...load.map((x) => x.n));
-
+  const soon = S.items.filter((i) => !i.done && i.due >= 0 && i.due <= 2).length;
   return head("Tổng quan", `Hôm nay, ${today}`) + `
   <div class="overview">
     <section class="panel" aria-labelledby="q-h">
-      <div class="panel-head"><h2 id="q-h">Cần bạn xử lý</h2><span>${items.length} mục</span></div>
-      ${items.length ? `<ul class="rows">${items.join("")}</ul>` : `<p class="empty">Đã xử lý hết các mục cần chú ý. Bấm "Đặt lại dữ liệu mẫu" ở đầu trang để chạy lại demo.</p>`}
+      <div class="panel-head"><h2 id="q-h">Cần bạn xử lý</h2><span>${queue.length} mục</span></div>
+      ${shown.length ? `<ul class="rows">${shown.join("")}</ul>${queue.length > shown.length ? `<p class="note">Còn ${queue.length - shown.length} mục nữa. Xử lý các mục trên để xem tiếp.</p>` : ""}`
+        : `<p class="empty">Đã xử lý hết các mục cần chú ý. Bấm "Đặt lại dữ liệu mẫu" ở đầu trang để chạy lại demo.</p>`}
     </section>
     <section class="panel" aria-labelledby="s-h">
       <div class="panel-head"><h2 id="s-h">Số liệu nhanh</h2></div>
       <dl class="stats">
-        <div><dt>Việc đang làm</dt><dd>${S.tasks.filter((t) => t.status === "doing").length}</dd></div>
-        <div><dt>Việc trễ hạn</dt><dd class="${lateTasks().length ? "warn" : ""}">${lateTasks().length}</dd></div>
+        <div><dt>Sự kiện sắp và đang diễn ra</dt><dd>${EVENTS.filter((e) => e.offset >= 0).length}</dd></div>
+        <div><dt>Việc trễ hạn</dt><dd class="${lateItems(S.items).length ? "warn" : ""}">${lateItems(S.items).length}</dd></div>
+        <div><dt>Việc đến hạn trong 2 ngày</dt><dd>${soon}</dd></div>
         <div><dt>Yêu cầu chờ duyệt</dt><dd>${pending().length}</dd></div>
-        <div><dt>Khoản chờ chi</dt><dd>${mil(sumPay("cho"))}</dd></div>
         <div><dt>Khoản quá hạn</dt><dd class="${latePays().length ? "warn" : ""}">${mil(sumPay("late"))}</dd></div>
       </dl>
     </section>
   </div>
-  <section class="panel" aria-labelledby="w-h">
-    <div class="panel-head"><h2 id="w-h">Việc chưa xong theo người</h2></div>
-    <div class="bars">${load.map((x) => `
-      <div class="bar-row"><span class="bar-label">${esc(x.m)}</span>
-        <div class="bar-track" aria-hidden="true"><i style="width:${pct(x.n, maxLoad)}%;background:var(--bar-done)"></i></div>
-        <span class="bar-val">${x.n} việc</span></div>`).join("")}</div>
+  <section class="panel" aria-labelledby="p-h">
+    <div class="panel-head"><h2 id="p-h">Tiến độ checklist theo sự kiện</h2></div>
+    <div class="bars">${EVENTS.map((e) => { const p = evProgress(e.id); return `
+      <div class="bar-row"><span class="bar-label">${esc(e.name)}</span>${progressBar(p.done, p.total, p.late)}<span class="bar-val">${p.done}/${p.total}</span></div>`; }).join("")}</div>
+    <div class="legend"><span style="--c:var(--bar-done)">Đã xong</span><span style="--c:var(--bar-late)">Trễ hạn</span></div>
   </section>`;
 }
 
-function viewTasks() {
-  return head("Công việc", "Theo dõi ai đang làm gì, việc nào đang trễ.") + `<div class="board">` + TASK_COLS.map((c) => {
-    const list = S.tasks.filter((t) => t.status === c.key);
-    return `<section class="panel" aria-labelledby="c-${c.key}">
-      <div class="panel-head"><h2 id="c-${c.key}">${c.label}</h2><span>${list.length}</span></div>
-      ${list.length ? `<ul class="rows">${list.map((t) => `
-        <li class="row"><div><div class="row-title">${esc(t.title)}</div>
-          <div class="row-meta">${esc(t.owner)} · hạn ${esc(t.due)} ${t.late && t.status !== "done" ? '<span class="chip late">Trễ hạn</span>' : ""}</div></div>
-          <div class="row-actions"><button class="btn${c.key === "doing" ? " primary" : ""}" data-act="advance" data-id="${t.id}">${c.verb}</button></div></li>`).join("")}</ul>`
-        : `<p class="empty">Chưa có việc nào ở cột này.</p>`}
-    </section>`;
-  }).join("") + `</div>`;
+function viewEvents() {
+  const evs = visibleEvents();
+  if (!evs.some((e) => e.id === selEv)) selEv = evs.length ? evs[0].id : 0;
+  const ev = evById(selEv);
+  const list = `<section class="panel" aria-labelledby="e-h">
+    <div class="panel-head"><h2 id="e-h">Sự kiện</h2><span>${evs.length} sự kiện</span></div>
+    <ul class="ev-list">${evs.map((e) => { const p = evProgress(e.id); return `<li><button type="button" data-ev="${e.id}"${e.id === selEv ? ' aria-current="true"' : ""}>
+      <span><span class="ev-name">${esc(e.name)}</span> ${eventChip(e)}<br><span class="ev-meta">${fmt(e.offset)} · ${esc(e.place)} · phụ trách ${esc(e.lead)}</span></span>
+      <span class="ev-prog"><span>${p.done}/${p.total} việc xong${p.late ? `, ${p.late} trễ` : ""}</span>${progressBar(p.done, p.total, p.late)}</span></button></li>`; }).join("")}</ul>
+  </section>`;
+  if (!ev) return head("Sự kiện", "Chưa có sự kiện nào.") + list;
+  const cols = PHASES.map((ph) => {
+    const rows = itemsOfEvent(ev.id).filter((i) => i.phase === ph.k);
+    const done = rows.filter((i) => i.done).length;
+    return `<section class="panel" aria-labelledby="ph-${ph.k}">
+      <div class="panel-head"><h2 id="ph-${ph.k}">${ph.label}</h2><span>${done}/${rows.length}</span></div>
+      <ul class="rows">${rows.map((i) => itemRow(i, false)).join("")}</ul></section>`;
+  }).join("");
+  return head("Sự kiện", "Checklist trước, trong và sau sự kiện. Việc đến hạn được nhắc tự động.") + list +
+    `<div class="board" aria-label="Checklist: ${esc(ev.name)}">${cols}</div>`;
+}
+
+function viewMyWork() {
+  const mine = myItems().sort((a, b) => a.due - b.due);
+  const open = mine.filter((i) => !i.done);
+  const done = mine.filter((i) => i.done);
+  const sub = role === "ctv" ? "Cộng tác viên chỉ thấy các việc được giao cho mình." : "Các việc được giao cho bạn, việc gần hạn nhất ở trên cùng.";
+  return head("Việc của tôi", sub) + `
+  <section class="panel" aria-labelledby="m-h">
+    <div class="panel-head"><h2 id="m-h">Cần làm</h2><span>${open.length} việc</span></div>
+    ${open.length ? `<ul class="rows">${open.map((i) => itemRow(i, true)).join("")}</ul>` : `<p class="empty">Bạn đã hoàn thành mọi việc được giao.</p>`}
+  </section>
+  <section class="panel" aria-labelledby="d-h">
+    <div class="panel-head"><h2 id="d-h">Đã xong</h2><span>${done.length} việc</span></div>
+    ${done.length ? `<ul class="rows">${done.map((i) => itemRow(i, true)).join("")}</ul>` : `<p class="empty">Chưa có việc nào hoàn thành.</p>`}
+  </section>`;
+}
+
+function viewDocs() {
+  const evs = visibleEvents();
+  if (!evs.some((e) => e.id === docEv)) docEv = evs.length ? evs[0].id : 0;
+  const ev = evById(docEv);
+  const folders = FOLDERS.filter((f) => f.roles.includes(role));
+  const hidden = FOLDERS.length - folders.length;
+  const sub = "Mỗi sự kiện có cùng một cấu trúc thư mục, đồng bộ với Drive của team.";
+  if (!ev) return head("Tài liệu", sub) + `<p class="empty">Chưa có sự kiện nào để hiển thị.</p>`;
+  return head("Tài liệu", sub) + `
+  <div class="toolbar">
+    <label class="sr" for="docev">Chọn sự kiện</label>
+    <select id="docev" data-docev>${evs.map((e) => `<option value="${e.id}"${e.id === docEv ? " selected" : ""}>${esc(e.name)}</option>`).join("")}</select>
+    <button class="btn primary" data-act="sync">Đồng bộ với Drive</button>
+    <span class="path">Drive / Sự kiện / ${esc(ev.name)}</span>
+  </div>
+  <section class="panel">
+    <ul class="folders">${folders.map((f, fi) => `<li>
+      <div class="folder-name"><span>${esc(f.name)}</span><span class="row-meta">${f.files.filter((_, i) => (ev.id + fi + i) % 4 !== 0).length}/${f.files.length} tệp</span></div>
+      <ul class="files">${f.files.map((name, i) => { const has = (ev.id + fi + i) % 4 !== 0;
+        return `<li><span>${esc(name)}</span>${has ? '<span class="chip ok">Đã có</span>' : '<span class="chip cho">Chưa có</span>'}</li>`; }).join("")}</ul></li>`).join("")}</ul>
+    ${hidden ? `<p class="note">${hidden} thư mục không hiển thị vì vai trò ${esc(ROLES[role].label.toLowerCase())} không có quyền xem.</p>` : ""}
+  </section>`;
 }
 
 function viewApprovals() {
@@ -407,20 +597,18 @@ function stacked(parts, total) {
 }
 
 function viewReports() {
-  const total = S.tasks.length;
-  const done = S.tasks.filter((t) => t.status === "done").length;
-  const doing = S.tasks.filter((t) => t.status === "doing").length;
-  const todo = total - done - doing;
+  const total = S.items.length;
+  const done = S.items.filter((i) => i.done).length;
+  const late = lateItems(S.items).length;
   const payTotal = S.payments.reduce((n, p) => n + p.amount, 0);
   const apTotal = S.approvals.length;
   const apDone = S.approvals.filter((a) => a.status !== "cho").length;
   return head("Báo cáo", "Số liệu tự tổng hợp từ dữ liệu bên trên, không cần làm bảng tính tay.") + `
   <section class="panel" aria-labelledby="r1">
-    <div class="panel-head"><h2 id="r1">Tiến độ công việc</h2><span>${pct(done, total)}% hoàn thành</span></div>
-    <div class="bars"><div class="bar-row"><span class="bar-label">${total} việc</span>
-      ${stacked([{ v: done, c: "var(--bar-done)" }, { v: doing, c: "var(--bar-mid)" }, { v: todo, c: "var(--bar-open)" }], total)}
-      <span class="bar-val">${done}/${total}</span></div></div>
-    <div class="legend"><span style="--c:var(--bar-done)">Hoàn thành ${done}</span><span style="--c:var(--bar-mid)">Đang làm ${doing}</span><span style="--c:var(--bar-open)">Cần làm ${todo}</span></div>
+    <div class="panel-head"><h2 id="r1">Checklist theo giai đoạn</h2><span>${pct(done, total)}% hoàn thành, ${late} việc trễ hạn</span></div>
+    <div class="bars">${PHASES.map((ph) => { const l = S.items.filter((i) => i.phase === ph.k); const d = l.filter((i) => i.done).length;
+      return `<div class="bar-row"><span class="bar-label">${ph.label}</span>${progressBar(d, l.length, lateItems(l).length)}<span class="bar-val">${d}/${l.length}</span></div>`; }).join("")}</div>
+    <div class="legend"><span style="--c:var(--bar-done)">Đã xong</span><span style="--c:var(--bar-late)">Trễ hạn</span></div>
   </section>
   <section class="panel" aria-labelledby="r2">
     <div class="panel-head"><h2 id="r2">Thanh toán nhà cung cấp</h2><span>Tổng ${vnd(payTotal)}</span></div>
@@ -437,9 +625,10 @@ function viewReports() {
   </section>`;
 }
 
-const VIEWS = { "tong-quan": viewOverview, "cong-viec": viewTasks, "phe-duyet": viewApprovals, "thanh-toan": viewPayments, "bao-cao": viewReports };
+const VIEWS = { "tong-quan": viewOverview, "su-kien": viewEvents, "viec": viewMyWork, "tai-lieu": viewDocs, "phe-duyet": viewApprovals, "thanh-toan": viewPayments, "bao-cao": viewReports };
 
 function render(focusMain) {
+  if (!NAV.find((n) => n.id === view && n.roles.includes(role))) view = ROLES[role].home;
   renderNav();
   $("#main").innerHTML = VIEWS[view]();
   if (focusMain) $("#main").focus({ preventScroll: true });
@@ -453,7 +642,7 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
 }
 
 const ACTIONS = {
@@ -461,14 +650,9 @@ const ACTIONS = {
   reject(id) { const a = S.approvals.find((x) => x.id === id); a.status = "no"; toast(`Đã từ chối: ${a.title}`); },
   undo(id) { const a = S.approvals.find((x) => x.id === id); a.status = "cho"; toast(`Đã hoàn tác: ${a.title}`); },
   pay(id) { const p = S.payments.find((x) => x.id === id); p.status = "ok"; toast(`Đã đánh dấu đã chi: ${p.vendor}`); },
-  remind(id) { const t = S.tasks.find((x) => x.id === id); toast(`Đã gửi nhắc tới ${t.owner} (demo, chưa gửi tin thật)`); },
-  advance(id) {
-    const t = S.tasks.find((x) => x.id === id);
-    const col = TASK_COLS.find((c) => c.key === t.status);
-    t.status = col.next;
-    if (t.status === "done") t.late = false;
-    toast(`${t.title}: ${TASK_COLS.find((c) => c.key === t.status).label.toLowerCase()}`);
-  },
+  remind(id) { const i = S.items.find((x) => x.id === id); toast(`Đã gửi nhắc tới ${i.owner} (demo, chưa gửi tin thật)`); },
+  toggle(id) { const i = S.items.find((x) => x.id === id); i.done = !i.done; toast(i.done ? `Đã hoàn thành: ${i.text}` : `Đã mở lại: ${i.text}`); },
+  sync() { toast("Đã đồng bộ (demo, chưa kết nối Drive thật)"); },
   reset() { S = structuredClone(SEED); apFilter = "cho"; payFilter = "all"; toast("Đã đặt lại dữ liệu mẫu"); }
 };
 
@@ -476,10 +660,23 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("button");
   if (!t) return;
   if (t.dataset.view) { view = t.dataset.view; render(true); return; }
+  if (t.dataset.ev) { selEv = Number(t.dataset.ev); render(); return; }
   if (t.dataset.filter) { apFilter = t.dataset.filter; render(); return; }
   if (t.dataset.pfilter) { payFilter = t.dataset.pfilter; render(); return; }
   const act = t.dataset.act;
   if (act && ACTIONS[act]) { ACTIONS[act](Number(t.dataset.id)); render(); }
+});
+
+document.addEventListener("change", (e) => {
+  if (e.target.id === "role") {
+    role = e.target.value;
+    view = ROLES[role].home;
+    toast(`Đang xem với vai trò ${ROLES[role].label.toLowerCase()}`);
+    render(true);
+  } else if (e.target.dataset.docev !== undefined) {
+    docEv = Number(e.target.value);
+    render();
+  }
 });
 
 render();
