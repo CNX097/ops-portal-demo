@@ -643,11 +643,10 @@ function viewEventDetail(id, tab) {
   if (!e) return head("Không tìm thấy sự kiện", "Sự kiện này không có trong bản demo.") + '<p><a class="link" href="#/su-kien">← Về danh sách sự kiện</a></p>';
   const p = progress(id);
   const sel = Object.entries(EV_STATUS).map(([k, v]) => `<option value="${k}"${e.status === k ? " selected" : ""}>${v[0]}</option>`).join("");
-  const tabs = [["tong-quan", "Tổng quan", 0], ["checklist", "Checklist", p.total], ["nhan-su", "Nhân sự", 0], ["tai-lieu", "Tài liệu", 0], ["ngan-sach", "Ngân sách", 0], ["khao-sat", "Khảo sát", 0], ["brief", "Brief Sale", 0], ["bao-cao", "Báo cáo", 0], ["hoat-dong", "Hoạt động", 0]];
+  const tabs = [["tong-quan", "Tổng quan", 0], ["checklist", "Checklist", p.total]];
   let body;
   if (tab === "checklist") body = detailChecklist(e);
-  else if (tab === "tong-quan") body = detailOverview(e);
-  else body = `<div class="card"><p class="stub">Mục này chưa có trong bản demo.</p></div>`;
+  else { tab = "tong-quan"; body = detailOverview(e); }
   return `<p><a class="link" href="#/su-kien">← Sự kiện</a></p>
   <div class="page-head"><div><h1>${esc(e.name)}</h1><div style="margin-top:6px">${evChip(e)}</div>
     <p style="margin-top:6px"><b style="color:var(--teal-d)">${esc(e.school)}</b> · ${esc(e.type)} · ${esc(e.area)}</p><div class="mono" style="margin-top:4px">${esc(e.code)}</div></div>
@@ -673,7 +672,7 @@ function detailOverview(e) {
   </div><div class="col">
     <section class="card"><div class="card-head"><div><h2>Ngân sách</h2></div><a class="link" href="#/ngan-sach">Chi tiết →</a></div>
       ${e.pr && e.pr.state !== "none" ? `<dl class="kv"><dt>PR</dt><dd class="mono" style="color:var(--ink)">${esc(e.pr.no)}</dd><dt>Trạng thái</dt><dd>${prChip(e)}</dd><dt>Ngân sách</dt><dd style="font-size:17px">${vnd(e.pr.amount)}</dd><dt>Đã chi (PM)</dt><dd>${vnd(spent)}</dd></dl>` : '<p class="empty">Chưa có PR cho sự kiện này.</p>'}</section>
-    <section class="card"><div class="card-head"><div><h2>Đội vận hành</h2></div><a class="link" href="#/su-kien/${e.id}?tab=nhan-su">Quản lý →</a></div><div class="card-pad" style="display:flex;gap:8px">${team.map((x) => av(x)).join("")}</div></section>
+    <section class="card"><div class="card-head"><div><h2>Đội vận hành</h2></div><a class="link" href="#/su-kien/${e.id}?tab=checklist">Xem checklist →</a></div><div class="card-pad" style="display:flex;gap:8px">${team.map((x) => av(x)).join("")}</div></section>
     <section class="card"><div class="card-head"><div><h2>Hoạt động gần đây</h2></div></div><div class="feed">${S.activity.filter((a) => a.ev === e.id).slice(0, 4).map(activityItem).join("") || '<p class="empty" style="padding:0">Chưa có hoạt động.</p>'}</div></section>
   </div></div>`;
 }
@@ -1105,16 +1104,13 @@ function viewDocs() {
     `<div class="tabs">${tabs.map(([k, l]) => `<a href="#/tai-lieu" data-dtab="${k}"${DF.tab === k ? ' aria-current="page"' : ""}>${l}</a>`).join("")}</div><div class="docs-grid"><div>${main}</div>${docTree()}</div>`;
 }
 
-const STUBS = { "lich": "Lịch", "brief-sale": "Brief Sale", "nhan-su": "Nhân sự", "nguoi-dung": "Người dùng", "mau-checklist": "Mẫu checklist", "ket-noi": "Kết nối Google" };
-const viewStub = (key) => head(STUBS[key], "") + '<div class="card"><p class="stub">Màn hình này chưa có trong bản demo.</p></div>';
 
 /* ---------- Điều hướng và vẽ ---------- */
 
 const NAV = [
-  ["tong-quan", "Tổng quan", "home"], ["su-kien", "Sự kiện", "event"], ["lich", "Lịch", "cal"], ["cong-viec", "Công việc", "tasks"],
-  ["tai-lieu", "Tài liệu", "folder"], ["doi-tac", "Đối tác & Trường", "school"], ["brief-sale", "Brief Sale", "mega"], ["khao-sat", "Khảo sát SV", "survey"],
-  ["ngan-sach", "Ngân sách PR/PM", "wallet"], ["hieu-suat", "Hiệu suất & Báo cáo", "chart"], ["nhan-su", "Nhân sự", "user"],
-  "QUẢN TRỊ", ["nguoi-dung", "Người dùng", "users"], ["mau-checklist", "Mẫu checklist", "clip"], ["ket-noi", "Kết nối Google", "plug"]
+  ["tong-quan", "Tổng quan", "home"], ["su-kien", "Sự kiện", "event"], ["cong-viec", "Công việc", "tasks"],
+  ["tai-lieu", "Tài liệu", "folder"], ["doi-tac", "Đối tác & Trường", "school"], ["khao-sat", "Khảo sát SV", "survey"],
+  ["ngan-sach", "Ngân sách PR/PM", "wallet"], ["hieu-suat", "Hiệu suất & Báo cáo", "chart"]
 ];
 function parseRoute() {
   const raw = location.hash.replace(/^#\/?/, "") || "tong-quan";
@@ -1140,7 +1136,6 @@ function render(focus) {
   else if (r.page === "doi-tac") html = viewPartners();
   else if (r.page === "khao-sat") html = viewSurvey();
   else if (r.page === "hieu-suat") html = viewPerf();
-  else if (STUBS[r.page]) html = viewStub(r.page);
   else html = head("Không tìm thấy trang", "") + '<p><a class="link" href="#/tong-quan">← Về Tổng quan</a></p>';
   $("#main").innerHTML = html;
   if (focus) { $("#main").focus({ preventScroll: true }); window.scrollTo(0, 0); }
