@@ -1,0 +1,12 @@
+# Bí mật và thông tin xác thực
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+
+# File rác của hệ điều hành và trình soạn thảo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

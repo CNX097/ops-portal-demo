@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cổng vận hành - Bản demo</title>
+<meta name="description" content="Bản demo portal quản lý vận hành nội bộ: giao việc, duyệt yêu cầu, theo dõi thanh toán và báo cáo tiến độ. Dữ liệu mẫu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3f5f2;
+  --panel: #ffffff;
+  --ink: #22302c;
+  --ink-soft: #55645f;
+  --line: #dce3df;
+  --pine: #1f5a4a;
+  --pine-dark: #17443a;
+  --pine-wash: #e4efea;
+  --amber: #8a5a0b;
+  --amber-wash: #fbf0d9;
+  --brick: #a5352a;
+  --brick-wash: #f8e3e0;
+  --bar-done: #1f5a4a;
+  --bar-mid: #c9902b;
+  --bar-open: #b9c5c0;
+  --bar-late: #a5352a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #151c1a;
+    --panel: #1d2623;
+    --ink: #e6ede9;
+    --ink-soft: #a3b1ab;
+    --line: #2f3b37;
+    --pine: #6fc2a8;
+    --pine-dark: #8fd3bc;
+    --pine-wash: #243630;
+    --amber: #e0b25a;
+    --amber-wash: #3a2f17;
+    --brick: #ee8f84;
+    --brick-wash: #40221e;
+    --bar-done: #6fc2a8;
+    --bar-mid: #d9a441;
+    --bar-open: #4a5853;
+    --bar-late: #ee8f84;
+  }
+}
+* { box-sizing: border-box; }
+html { color-scheme: light dark; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+
+.demo-strip {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 8px 20px; background: var(--amber-wash); color: var(--amber);
+  font-size: 13px; border-bottom: 1px solid var(--line);
+}
+.demo-strip button {
+  background: transparent; border: 1px solid currentColor; border-radius: 4px;
+  padding: 2px 10px; cursor: pointer; white-space: nowrap;
+}
+
+.app { display: grid; grid-template-columns: 232px 1fr; min-height: calc(100vh - 38px); }
+
+.rail {
+  background: var(--panel); border-right: 1px solid var(--line);
+  padding: 22px 14px; display: flex; flex-direction: column; gap: 22px;
+}
+.brand { font-weight: 700; font-size: 17px; padding: 0 10px; letter-spacing: -0.01em; }
+.brand small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-soft); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav button {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  text-align: left; background: none; border: 0; border-radius: 6px;
+  padding: 9px 10px; cursor: pointer; color: var(--ink-soft);
+}
+.nav button:hover { background: var(--paper); color: var(--ink); }
+.nav button[aria-current="page"] { background: var(--pine-wash); color: var(--pine-dark); font-weight: 500; }
+.badge {
+  min-width: 22px; padding: 0 7px; border-radius: 11px; font-size: 12px; line-height: 20px;
+  text-align: center; background: var(--amber-wash); color: var(--amber); font-weight: 500;
+}
+.badge.late { background: var(--brick-wash); color: var(--brick); }
+.badge:empty { display: none; }
+.who { margin-top: auto; padding: 0 10px; font-size: 13px; color: var(--ink-soft); }
+.who b { display: block; color: var(--ink); font-weight: 500; }
+
+main { padding: 28px 32px 56px; max-width: 1080px; width: 100%; }
+.page-head { margin-bottom: 22px; }
+.page-head h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; }
+.page-head p { margin: 4px 0 0; color: var(--ink-soft); }
+
+h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.panel + .panel { margin-top: 20px; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 18px 0; }
+.panel-head h2 { margin: 0; }
+.panel-head span { color: var(--ink-soft); font-size: 13px; }
+
+.rows { list-style: none; margin: 0; padding: 6px 18px 8px; }
+.row {
+  display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; align-items: center;
+  padding: 13px 0; border-bottom: 1px solid var(--line);
+}
+.row:last-child { border-bottom: 0; }
+.row-title { font-weight: 500; }
+.row-meta { color: var(--ink-soft); font-size: 13px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.empty { padding: 22px 18px 24px; color: var(--ink-soft); }
+
+.btn {
+  border: 1px solid var(--line); background: var(--panel); border-radius: 5px;
+  padding: 5px 13px; cursor: pointer; font-size: 14px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-soft); }
+.btn.primary { background: var(--pine); border-color: var(--pine); color: #fff; }
+.btn.primary:hover { background: var(--pine-dark); border-color: var(--pine-dark); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .btn.primary { color: #10201b; }
+}
+
+.chip { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.chip.cho { background: var(--amber-wash); color: var(--amber); }
+.chip.ok { background: var(--pine-wash); color: var(--pine-dark); }
+.chip.late { background: var(--brick-wash); color: var(--brick); }
+.chip.off { background: var(--paper); color: var(--ink-soft); border: 1px solid var(--line); }
+
+.overview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr); gap: 20px; align-items: start; }
+.overview .panel + .panel { margin-top: 0; }
+.stats { margin: 0; padding: 8px 18px 12px; }
+.stats div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.stats div:last-child { border-bottom: 0; }
+.stats dt { color: var(--ink-soft); }
+.stats dd { margin: 0; font-weight: 700; }
+.stats dd.warn { color: var(--brick); }
+
+.bars { padding: 12px 18px 16px; display: grid; gap: 12px; }
+.bar-row { display: grid; grid-template-columns: 130px 1fr 64px; gap: 12px; align-items: center; }
+.bar-label { color: var(--ink-soft); font-size: 14px; }
+.bar-val { text-align: right; font-weight: 500; }
+.bar-track { display: flex; height: 12px; background: var(--paper); border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.bar-track i { display: block; height: 100%; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 0 18px 16px; font-size: 13px; color: var(--ink-soft); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
+
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.board .panel + .panel { margin-top: 0; }
+.board .rows { padding-top: 2px; }
+.board .row { grid-template-columns: 1fr; }
+.board .row-actions { justify-content: flex-start; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+.tabs button {
+  background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 14px; margin-bottom: -1px;
+  cursor: pointer; color: var(--ink-soft);
+}
+.tabs button[aria-selected="true"] { color: var(--pine-dark); border-bottom-color: var(--pine); font-weight: 500; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 12px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-weight: 500; color: var(--ink-soft); font-size: 13px; }
+td.num, th.num { text-align: right; }
+tbody tr:last-child td { border-bottom: 0; }
+.table-wrap { overflow-x: auto; }
+.totals { display: flex; gap: 28px; flex-wrap: wrap; padding: 14px 18px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 14px; }
+.totals b { color: var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 6px;
+  font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .18s;
+  max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 900px) {
+  .overview, .board { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+  .rail { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .brand small, .who { display: none; }
+  .brand { padding: 0 6px 0 0; white-space: nowrap; }
+  .nav { flex-direction: row; }
+  .nav button { white-space: nowrap; }
+  main { padding: 20px 16px 48px; }
+  .bar-row { grid-template-columns: 1fr 56px; }
+  .bar-row .bar-track { grid-column: 1 / -1; grid-row: 2; }
+  .row { grid-template-columns: 1fr; }
+  .row-actions { justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="demo-strip" role="note">
+  <span>Bản demo với dữ liệu mẫu. Mọi thao tác chỉ diễn ra trên trình duyệt của bạn.</span>
+  <button type="button" data-act="reset">Đặt lại dữ liệu mẫu</button>
+</div>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">Cổng vận hành<small>Công ty Mẫu</small></div>
+    <nav class="nav" id="nav" aria-label="Điều hướng chính"></nav>
+    <div class="who"><b>Phương Linh</b>Quản lý vận hành</div>
+  </aside>
+  <main id="main" tabindex="-1"></main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* Dữ liệu mẫu: toàn bộ tên người, nhà cung cấp và số liệu đều là hư cấu. */
+const SEED = {
+  members: ["Minh Anh", "Quốc Bảo", "Thu Hà", "Đức Long"],
+  tasks: [
+    { id: 1, title: "Chốt kịch bản và timeline sự kiện tháng 11", owner: "Minh Anh", due: "12/10", status: "doing", late: false },
+    { id: 2, title: "Đối chiếu báo giá in ấn với ngân sách", owner: "Quốc Bảo", due: "08/10", status: "todo", late: true },
+    { id: 3, title: "Xác nhận danh sách khách mời đợt 2", owner: "Thu Hà", due: "14/10", status: "doing", late: false },
+    { id: 4, title: "Cập nhật checklist hậu cần", owner: "Đức Long", due: "15/10", status: "todo", late: false },
+    { id: 5, title: "Gửi biên bản họp tuần cho cả team", owner: "Thu Hà", due: "07/10", status: "done", late: false },
+    { id: 6, title: "Chuẩn bị tài liệu cho buổi đào tạo", owner: "Minh Anh", due: "20/10", status: "todo", late: false },
+    { id: 7, title: "Kiểm tra thiết bị âm thanh ánh sáng", owner: "Đức Long", due: "09/10", status: "doing", late: true },
+    { id: 8, title: "Tổng hợp phản hồi sau sự kiện trước", owner: "Quốc Bảo", due: "05/10", status: "done", late: false },
+    { id: 9, title: "Làm hợp đồng với nhà cung cấp sân khấu", owner: "Thu Hà", due: "10/10", status: "todo", late: false }
+  ],
+  approvals: [
+    { id: 1, title: "Mua vật tư in ấn đợt 2", by: "Quốc Bảo", kind: "Chi phí", amount: 18500000, status: "cho" },
+    { id: 2, title: "Thuê thêm 2 nhân sự hỗ trợ ngày sự kiện", by: "Đức Long", kind: "Nhân sự", amount: 6000000, status: "cho" },
+    { id: 3, title: "Đổi địa điểm họp đối tác sang phòng lớn hơn", by: "Minh Anh", kind: "Cơ sở vật chất", amount: 0, status: "cho" },
+    { id: 4, title: "Tăng ngân sách quà tặng khách mời", by: "Thu Hà", kind: "Chi phí", amount: 4200000, status: "cho" },
+    { id: 5, title: "Nghỉ phép 2 ngày sau sự kiện", by: "Đức Long", kind: "Nhân sự", amount: 0, status: "ok" },
+    { id: 6, title: "Gia hạn hợp đồng thuê thiết bị", by: "Quốc Bảo", kind: "Chi phí", amount: 9800000, status: "no" }
+  ],
+  payments: [
+    { id: 1, vendor: "Sân khấu Sao Mai", ref: "HD-014", amount: 32000000, due: "10/10", status: "cho" },
+    { id: 2, vendor: "In ấn Bình Minh", ref: "HD-017", amount: 18500000, due: "05/10", status: "late" },
+    { id: 3, vendor: "Âm thanh ánh sáng Đại Phát", ref: "HD-011", amount: 24500000, due: "12/10", status: "cho" },
+    { id: 4, vendor: "Quà tặng Hoa Nắng", ref: "HD-020", amount: 7200000, due: "30/09", status: "ok" },
+    { id: 5, vendor: "Catering Bếp Xanh", ref: "HD-016", amount: 15800000, due: "06/10", status: "late" },
+    { id: 6, vendor: "Thiết kế Nét Việt", ref: "HD-009", amount: 9000000, due: "28/09", status: "ok" },
+    { id: 7, vendor: "Vận chuyển Nhanh Việt", ref: "HD-022", amount: 3600000, due: "15/10", status: "cho" }
+  ]
+};
+
+let S = structuredClone(SEED);
+let view = "tong-quan";
+let apFilter = "cho";
+let payFilter = "all";
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const vnd = (n) => n.toLocaleString("vi-VN") + " đ";
+const mil = (n) => (n / 1000000).toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + " triệu";
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+
+const TASK_COLS = [
+  { key: "todo", label: "Cần làm", next: "doing", verb: "Bắt đầu" },
+  { key: "doing", label: "Đang làm", next: "done", verb: "Hoàn thành" },
+  { key: "done", label: "Hoàn thành", next: "todo", verb: "Mở lại" }
+];
+const AP_LABEL = { cho: "Chờ duyệt", ok: "Đã duyệt", no: "Đã từ chối" };
+const AP_CHIP = { cho: "cho", ok: "ok", no: "off" };
+const PAY_LABEL = { cho: "Chờ chi", late: "Quá hạn", ok: "Đã chi" };
+const PAY_CHIP = { cho: "cho", late: "late", ok: "ok" };
+
+const pending = () => S.approvals.filter((a) => a.status === "cho");
+const lateTasks = () => S.tasks.filter((t) => t.late && t.status !== "done");
+const latePays = () => S.payments.filter((p) => p.status === "late");
+const sumPay = (st) => S.payments.filter((p) => p.status === st).reduce((n, p) => n + p.amount, 0);
+
+/* ---------- Giao diện ---------- */
+
+const NAV = [
+  { id: "tong-quan", label: "Tổng quan" },
+  { id: "cong-viec", label: "Công việc", badge: () => lateTasks().length, late: true },
+  { id: "phe-duyet", label: "Phê duyệt", badge: () => pending().length },
+  { id: "thanh-toan", label: "Thanh toán", badge: () => latePays().length, late: true },
+  { id: "bao-cao", label: "Báo cáo" }
+];
+
+function renderNav() {
+  $("#nav").innerHTML = NAV.map((n) => {
+    const count = n.badge ? n.badge() : 0;
+    const badge = count ? `<span class="badge${n.late ? " late" : ""}">${count}</span>` : "";
+    return `<button type="button" data-view="${n.id}"${n.id === view ? ' aria-current="page"' : ""}>${esc(n.label)}${badge}</button>`;
+  }).join("");
+}
+
+function head(title, sub) {
+  return `<div class="page-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`;
+}
+
+function queueRow(kind, title, meta, actions) {
+  return `<li class="row"><div><div class="row-title">${esc(title)}</div><div class="row-meta">${esc(kind)} · ${esc(meta)}</div></div><div class="row-actions">${actions}</div></li>`;
+}
+
+function viewOverview() {
+  const today = new Date().toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long" });
+  const items = [];
+  pending().forEach((a) => items.push(queueRow("Cần duyệt", a.title, `${a.by}${a.amount ? " · " + vnd(a.amount) : ""}`,
+    `<button class="btn primary" data-act="approve" data-id="${a.id}">Duyệt</button><button class="btn" data-act="reject" data-id="${a.id}">Từ chối</button>`)));
+  latePays().forEach((p) => items.push(queueRow("Thanh toán quá hạn", `${p.vendor} (${p.ref})`, `${vnd(p.amount)} · hạn ${p.due}`,
+    `<button class="btn primary" data-act="pay" data-id="${p.id}">Đánh dấu đã chi</button>`)));
+  lateTasks().forEach((t) => items.push(queueRow("Việc trễ hạn", t.title, `${t.owner} · hạn ${t.due}`,
+    `<button class="btn" data-act="remind" data-id="${t.id}">Nhắc ${esc(t.owner)}</button>`)));
+
+  const open = S.tasks.filter((t) => t.status !== "done");
+  const load = S.members.map((m) => ({ m, n: open.filter((t) => t.owner === m).length }));
+  const maxLoad = Math.max(1, ...load.map((x) => x.n));
+
+  return head("Tổng quan", `Hôm nay, ${today}`) + `
+  <div class="overview">
+    <section class="panel" aria-labelledby="q-h">
+      <div class="panel-head"><h2 id="q-h">Cần bạn xử lý</h2><span>${items.length} mục</span></div>
+      ${items.length ? `<ul class="rows">${items.join("")}</ul>` : `<p class="empty">Đã xử lý hết các mục cần chú ý. Bấm "Đặt lại dữ liệu mẫu" ở đầu trang để chạy lại demo.</p>`}
+    </section>
+    <section class="panel" aria-labelledby="s-h">
+      <div class="panel-head"><h2 id="s-h">Số liệu nhanh</h2></div>
+      <dl class="stats">
+        <div><dt>Việc đang làm</dt><dd>${S.tasks.filter((t) => t.status === "doing").length}</dd></div>
+        <div><dt>Việc trễ hạn</dt><dd class="${lateTasks().length ? "warn" : ""}">${lateTasks().length}</dd></div>
+        <div><dt>Yêu cầu chờ duyệt</dt><dd>${pending().length}</dd></div>
+        <div><dt>Khoản chờ chi</dt><dd>${mil(sumPay("cho"))}</dd></div>
+        <div><dt>Khoản quá hạn</dt><dd class="${latePays().length ? "warn" : ""}">${mil(sumPay("late"))}</dd></div>
+      </dl>
+    </section>
+  </div>
+  <section class="panel" aria-labelledby="w-h">
+    <div class="panel-head"><h2 id="w-h">Việc chưa xong theo người</h2></div>
+    <div class="bars">${load.map((x) => `
+      <div class="bar-row"><span class="bar-label">${esc(x.m)}</span>
+        <div class="bar-track" aria-hidden="true"><i style="width:${pct(x.n, maxLoad)}%;background:var(--bar-done)"></i></div>
+        <span class="bar-val">${x.n} việc</span></div>`).join("")}</div>
+  </section>`;
+}
+
+function viewTasks() {
+  return head("Công việc", "Theo dõi ai đang làm gì, việc nào đang trễ.") + `<div class="board">` + TASK_COLS.map((c) => {
+    const list = S.tasks.filter((t) => t.status === c.key);
+    return `<section class="panel" aria-labelledby="c-${c.key}">
+      <div class="panel-head"><h2 id="c-${c.key}">${c.label}</h2><span>${list.length}</span></div>
+      ${list.length ? `<ul class="rows">${list.map((t) => `
+        <li class="row"><div><div class="row-title">${esc(t.title)}</div>
+          <div class="row-meta">${esc(t.owner)} · hạn ${esc(t.due)} ${t.late && t.status !== "done" ? '<span class="chip late">Trễ hạn</span>' : ""}</div></div>
+          <div class="row-actions"><button class="btn${c.key === "doing" ? " primary" : ""}" data-act="advance" data-id="${t.id}">${c.verb}</button></div></li>`).join("")}</ul>`
+        : `<p class="empty">Chưa có việc nào ở cột này.</p>`}
+    </section>`;
+  }).join("") + `</div>`;
+}
+
+function viewApprovals() {
+  const list = S.approvals.filter((a) => apFilter === "all" || (apFilter === "cho" ? a.status === "cho" : a.status !== "cho"));
+  const tabs = [["cho", "Chờ duyệt"], ["xong", "Đã xử lý"], ["all", "Tất cả"]];
+  return head("Phê duyệt", "Duyệt hoặc từ chối yêu cầu, mọi quyết định đều được lưu lại.") + `
+  <div class="tabs" role="tablist" aria-label="Lọc yêu cầu">${tabs.map(([k, l]) =>
+    `<button type="button" role="tab" data-filter="${k}" aria-selected="${apFilter === k}">${l}</button>`).join("")}</div>
+  <section class="panel">
+    ${list.length ? `<ul class="rows">${list.map((a) => `
+      <li class="row"><div><div class="row-title">${esc(a.title)} <span class="chip ${AP_CHIP[a.status]}">${AP_LABEL[a.status]}</span></div>
+        <div class="row-meta">${esc(a.kind)} · ${esc(a.by)} · ${a.amount ? vnd(a.amount) : "Không phát sinh chi phí"}</div></div>
+        <div class="row-actions">${a.status === "cho"
+          ? `<button class="btn primary" data-act="approve" data-id="${a.id}">Duyệt</button><button class="btn" data-act="reject" data-id="${a.id}">Từ chối</button>`
+          : `<button class="btn" data-act="undo" data-id="${a.id}">Hoàn tác</button>`}</div></li>`).join("")}</ul>`
+      : `<p class="empty">Không có yêu cầu nào trong mục này.</p>`}
+  </section>`;
+}
+
+function viewPayments() {
+  const list = S.payments.filter((p) => payFilter === "all" || p.status === payFilter);
+  const tabs = [["all", "Tất cả"], ["late", "Quá hạn"], ["cho", "Chờ chi"], ["ok", "Đã chi"]];
+  return head("Thanh toán", "Theo dõi khoản phải trả cho nhà cung cấp.") + `
+  <div class="tabs" role="tablist" aria-label="Lọc thanh toán">${tabs.map(([k, l]) =>
+    `<button type="button" role="tab" data-pfilter="${k}" aria-selected="${payFilter === k}">${l}</button>`).join("")}</div>
+  <section class="panel">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nhà cung cấp</th><th>Hợp đồng</th><th>Hạn chi</th><th class="num">Số tiền</th><th>Trạng thái</th><th><span class="sr">Thao tác</span></th></tr></thead>
+      <tbody>${list.length ? list.map((p) => `
+        <tr><td>${esc(p.vendor)}</td><td>${esc(p.ref)}</td><td>${esc(p.due)}</td><td class="num">${vnd(p.amount)}</td>
+        <td><span class="chip ${PAY_CHIP[p.status]}">${PAY_LABEL[p.status]}</span></td>
+        <td>${p.status !== "ok" ? `<button class="btn" data-act="pay" data-id="${p.id}">Đánh dấu đã chi</button>` : ""}</td></tr>`).join("")
+        : `<tr><td colspan="6">Không có khoản nào trong mục này.</td></tr>`}</tbody>
+    </table></div>
+    <div class="totals"><span>Chờ chi: <b>${vnd(sumPay("cho"))}</b></span><span>Quá hạn: <b>${vnd(sumPay("late"))}</b></span><span>Đã chi: <b>${vnd(sumPay("ok"))}</b></span></div>
+  </section>`;
+}
+
+function stacked(parts, total) {
+  return `<div class="bar-track" aria-hidden="true">${parts.map((p) => `<i style="width:${pct(p.v, total)}%;background:${p.c}"></i>`).join("")}</div>`;
+}
+
+function viewReports() {
+  const total = S.tasks.length;
+  const done = S.tasks.filter((t) => t.status === "done").length;
+  const doing = S.tasks.filter((t) => t.status === "doing").length;
+  const todo = total - done - doing;
+  const payTotal = S.payments.reduce((n, p) => n + p.amount, 0);
+  const apTotal = S.approvals.length;
+  const apDone = S.approvals.filter((a) => a.status !== "cho").length;
+  return head("Báo cáo", "Số liệu tự tổng hợp từ dữ liệu bên trên, không cần làm bảng tính tay.") + `
+  <section class="panel" aria-labelledby="r1">
+    <div class="panel-head"><h2 id="r1">Tiến độ công việc</h2><span>${pct(done, total)}% hoàn thành</span></div>
+    <div class="bars"><div class="bar-row"><span class="bar-label">${total} việc</span>
+      ${stacked([{ v: done, c: "var(--bar-done)" }, { v: doing, c: "var(--bar-mid)" }, { v: todo, c: "var(--bar-open)" }], total)}
+      <span class="bar-val">${done}/${total}</span></div></div>
+    <div class="legend"><span style="--c:var(--bar-done)">Hoàn thành ${done}</span><span style="--c:var(--bar-mid)">Đang làm ${doing}</span><span style="--c:var(--bar-open)">Cần làm ${todo}</span></div>
+  </section>
+  <section class="panel" aria-labelledby="r2">
+    <div class="panel-head"><h2 id="r2">Thanh toán nhà cung cấp</h2><span>Tổng ${vnd(payTotal)}</span></div>
+    <div class="bars"><div class="bar-row"><span class="bar-label">Theo số tiền</span>
+      ${stacked([{ v: sumPay("ok"), c: "var(--bar-done)" }, { v: sumPay("cho"), c: "var(--bar-mid)" }, { v: sumPay("late"), c: "var(--bar-late)" }], payTotal)}
+      <span class="bar-val">${pct(sumPay("ok"), payTotal)}%</span></div></div>
+    <div class="legend"><span style="--c:var(--bar-done)">Đã chi ${mil(sumPay("ok"))}</span><span style="--c:var(--bar-mid)">Chờ chi ${mil(sumPay("cho"))}</span><span style="--c:var(--bar-late)">Quá hạn ${mil(sumPay("late"))}</span></div>
+  </section>
+  <section class="panel" aria-labelledby="r3">
+    <div class="panel-head"><h2 id="r3">Xử lý yêu cầu duyệt</h2><span>${apDone}/${apTotal} đã xử lý</span></div>
+    <div class="bars"><div class="bar-row"><span class="bar-label">${apTotal} yêu cầu</span>
+      ${stacked([{ v: apDone, c: "var(--bar-done)" }, { v: apTotal - apDone, c: "var(--bar-mid)" }], apTotal)}
+      <span class="bar-val">${pct(apDone, apTotal)}%</span></div></div>
+  </section>`;
+}
+
+const VIEWS = { "tong-quan": viewOverview, "cong-viec": viewTasks, "phe-duyet": viewApprovals, "thanh-toan": viewPayments, "bao-cao": viewReports };
+
+function render(focusMain) {
+  renderNav();
+  $("#main").innerHTML = VIEWS[view]();
+  if (focusMain) $("#main").focus({ preventScroll: true });
+}
+
+/* ---------- Thao tác ---------- */
+
+let toastTimer;
+function toast(msg) {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
+}
+
+const ACTIONS = {
+  approve(id) { const a = S.approvals.find((x) => x.id === id); a.status = "ok"; toast(`Đã duyệt: ${a.title}`); },
+  reject(id) { const a = S.approvals.find((x) => x.id === id); a.status = "no"; toast(`Đã từ chối: ${a.title}`); },
+  undo(id) { const a = S.approvals.find((x) => x.id === id); a.status = "cho"; toast(`Đã hoàn tác: ${a.title}`); },
+  pay(id) { const p = S.payments.find((x) => x.id === id); p.status = "ok"; toast(`Đã đánh dấu đã chi: ${p.vendor}`); },
+  remind(id) { const t = S.tasks.find((x) => x.id === id); toast(`Đã gửi nhắc tới ${t.owner} (demo, chưa gửi tin thật)`); },
+  advance(id) {
+    const t = S.tasks.find((x) => x.id === id);
+    const col = TASK_COLS.find((c) => c.key === t.status);
+    t.status = col.next;
+    if (t.status === "done") t.late = false;
+    toast(`${t.title}: ${TASK_COLS.find((c) => c.key === t.status).label.toLowerCase()}`);
+  },
+  reset() { S = structuredClone(SEED); apFilter = "cho"; payFilter = "all"; toast("Đã đặt lại dữ liệu mẫu"); }
+};
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.view) { view = t.dataset.view; render(true); return; }
+  if (t.dataset.filter) { apFilter = t.dataset.filter; render(); return; }
+  if (t.dataset.pfilter) { payFilter = t.dataset.pfilter; render(); return; }
+  const act = t.dataset.act;
+  if (act && ACTIONS[act]) { ACTIONS[act](Number(t.dataset.id)); render(); }
+});
+
+render();
+</script>
+</body>
+</html>
