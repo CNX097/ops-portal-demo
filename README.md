@@ -8,8 +8,8 @@ Repo này công khai nên chỉ chứa bản demo với dữ liệu mẫu. Propo
 
 ```
 ops-portal-demo/
-├── demo/            Bản demo v2 bấm được, chỉ dùng dữ liệu mẫu
-│   └── portal/      Bản demo giao diện portal đầy đủ hơn (Tổng quan, Sự kiện, Công việc, Ngân sách, Tài liệu)
+├── demo/            Bản demo chính: giao diện portal (Tổng quan, Sự kiện, Công việc, Ngân sách, Tài liệu), chỉ dùng dữ liệu mẫu
+│   └── v2/          Bản demo cũ (phân quyền theo vai trò, phê duyệt, thanh toán, báo cáo)
 └── .github/    Tự động đưa thư mục demo/ lên GitHub Pages
 ```
 

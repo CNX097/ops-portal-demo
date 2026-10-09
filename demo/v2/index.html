@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cổng vận hành sự kiện - Bản demo</title>
+<meta name="description" content="Bản demo portal vận hành sự kiện nội bộ: checklist trước, trong và sau sự kiện, nhắc hạn tự động, phân quyền theo vai trò, hồ sơ chuẩn hóa. Dữ liệu mẫu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3f5f2;
+  --panel: #ffffff;
+  --ink: #22302c;
+  --ink-soft: #55645f;
+  --line: #dce3df;
+  --pine: #1f5a4a;
+  --pine-dark: #17443a;
+  --pine-wash: #e4efea;
+  --amber: #8a5a0b;
+  --amber-wash: #fbf0d9;
+  --brick: #a5352a;
+  --brick-wash: #f8e3e0;
+  --bar-done: #1f5a4a;
+  --bar-mid: #c9902b;
+  --bar-open: #b9c5c0;
+  --bar-late: #a5352a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #151c1a;
+    --panel: #1d2623;
+    --ink: #e6ede9;
+    --ink-soft: #a3b1ab;
+    --line: #2f3b37;
+    --pine: #6fc2a8;
+    --pine-dark: #8fd3bc;
+    --pine-wash: #243630;
+    --amber: #e0b25a;
+    --amber-wash: #3a2f17;
+    --brick: #ee8f84;
+    --brick-wash: #40221e;
+    --bar-done: #6fc2a8;
+    --bar-mid: #d9a441;
+    --bar-open: #4a5853;
+    --bar-late: #ee8f84;
+  }
+}
+* { box-sizing: border-box; }
+html { color-scheme: light dark; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+
+.demo-strip {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 8px 20px; background: var(--amber-wash); color: var(--amber);
+  font-size: 13px; border-bottom: 1px solid var(--line);
+}
+.demo-strip button {
+  background: transparent; border: 1px solid currentColor; border-radius: 4px;
+  padding: 2px 10px; cursor: pointer; white-space: nowrap;
+}
+
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 38px); }
+
+.rail {
+  background: var(--panel); border-right: 1px solid var(--line);
+  padding: 22px 14px; display: flex; flex-direction: column; gap: 22px;
+}
+.brand { font-weight: 700; font-size: 17px; padding: 0 10px; letter-spacing: -0.01em; }
+.brand small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-soft); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav button {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  text-align: left; background: none; border: 0; border-radius: 6px;
+  padding: 9px 10px; cursor: pointer; color: var(--ink-soft);
+}
+.nav button:hover { background: var(--paper); color: var(--ink); }
+.nav button[aria-current="page"] { background: var(--pine-wash); color: var(--pine-dark); font-weight: 500; }
+.badge {
+  min-width: 22px; padding: 0 7px; border-radius: 11px; font-size: 12px; line-height: 20px;
+  text-align: center; background: var(--amber-wash); color: var(--amber); font-weight: 500;
+}
+.badge.late { background: var(--brick-wash); color: var(--brick); }
+.who { margin-top: auto; padding: 0 10px; font-size: 13px; color: var(--ink-soft); }
+.who label { display: block; margin-bottom: 4px; }
+.who b { display: block; color: var(--ink); font-weight: 500; margin-top: 8px; }
+select {
+  width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px;
+  background: var(--panel); cursor: pointer;
+}
+
+main { padding: 28px 32px 56px; max-width: 1120px; width: 100%; }
+.page-head { margin-bottom: 22px; }
+.page-head h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; }
+.page-head p { margin: 4px 0 0; color: var(--ink-soft); }
+
+h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: -0.005em; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.panel + .panel { margin-top: 20px; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 18px 0; }
+.panel-head h2 { margin: 0; }
+.panel-head span { color: var(--ink-soft); font-size: 13px; }
+
+.rows { list-style: none; margin: 0; padding: 6px 18px 8px; }
+.row {
+  display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; align-items: center;
+  padding: 13px 0; border-bottom: 1px solid var(--line);
+}
+.row:last-child { border-bottom: 0; }
+.row-title { font-weight: 500; }
+.row-meta { color: var(--ink-soft); font-size: 13px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.row.done .row-title { color: var(--ink-soft); font-weight: 400; }
+.empty { padding: 22px 18px 24px; color: var(--ink-soft); }
+.note { padding: 12px 18px 16px; color: var(--ink-soft); font-size: 13px; border-top: 1px solid var(--line); }
+
+.btn {
+  border: 1px solid var(--line); background: var(--panel); border-radius: 5px;
+  padding: 5px 13px; cursor: pointer; font-size: 14px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-soft); }
+.btn.primary { background: var(--pine); border-color: var(--pine); color: #fff; }
+.btn.primary:hover { background: var(--pine-dark); border-color: var(--pine-dark); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .btn.primary { color: #10201b; }
+}
+
+.chip { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 12px; font-weight: 500; vertical-align: 1px; }
+.chip.cho { background: var(--amber-wash); color: var(--amber); }
+.chip.ok { background: var(--pine-wash); color: var(--pine-dark); }
+.chip.late { background: var(--brick-wash); color: var(--brick); }
+.chip.off { background: var(--paper); color: var(--ink-soft); border: 1px solid var(--line); }
+
+.overview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr); gap: 20px; align-items: start; margin-bottom: 20px; }
+.overview .panel + .panel { margin-top: 0; }
+.stats { margin: 0; padding: 8px 18px 12px; }
+.stats div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.stats div:last-child { border-bottom: 0; }
+.stats dt { color: var(--ink-soft); }
+.stats dd { margin: 0; font-weight: 700; }
+.stats dd.warn { color: var(--brick); }
+
+.bars { padding: 12px 18px 16px; display: grid; gap: 12px; }
+.bar-row { display: grid; grid-template-columns: 220px 1fr 72px; gap: 12px; align-items: center; }
+.bar-label { color: var(--ink-soft); font-size: 14px; }
+.bar-val { text-align: right; font-weight: 500; }
+.bar-track { display: flex; height: 12px; background: var(--paper); border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.bar-track i { display: block; height: 100%; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 0 18px 16px; font-size: 13px; color: var(--ink-soft); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
+
+.ev-list { list-style: none; margin: 0; padding: 6px 8px 8px; }
+.ev-list button {
+  display: grid; grid-template-columns: 1fr 150px; gap: 6px 16px; align-items: center; width: 100%;
+  text-align: left; background: none; border: 0; border-radius: 6px; padding: 11px 10px; cursor: pointer;
+}
+.ev-list button:hover { background: var(--paper); }
+.ev-list button[aria-current="true"] { background: var(--pine-wash); }
+.ev-name { font-weight: 500; }
+.ev-meta { color: var(--ink-soft); font-size: 13px; }
+.ev-prog { display: grid; gap: 4px; font-size: 13px; color: var(--ink-soft); }
+
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; margin-top: 20px; }
+.board .panel + .panel { margin-top: 0; }
+.board .rows { padding-top: 2px; }
+.board .row { grid-template-columns: 1fr; }
+.board .row-actions { justify-content: flex-start; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+.tabs button {
+  background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 14px; margin-bottom: -1px;
+  cursor: pointer; color: var(--ink-soft);
+}
+.tabs button[aria-selected="true"] { color: var(--pine-dark); border-bottom-color: var(--pine); font-weight: 500; }
+
+.toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.toolbar select { width: auto; min-width: 260px; }
+.path { color: var(--ink-soft); font-size: 13px; }
+
+.folders { list-style: none; margin: 0; padding: 4px 18px 12px; }
+.folders > li { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.folders > li:last-child { border-bottom: 0; }
+.folder-name { font-weight: 500; display: flex; justify-content: space-between; gap: 12px; }
+.files { list-style: none; margin: 6px 0 0; padding: 0 0 0 18px; color: var(--ink-soft); font-size: 14px; }
+.files li { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 12px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-weight: 500; color: var(--ink-soft); font-size: 13px; }
+td.num, th.num { text-align: right; }
+tbody tr:last-child td { border-bottom: 0; }
+.table-wrap { overflow-x: auto; }
+.totals { display: flex; gap: 28px; flex-wrap: wrap; padding: 14px 18px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 14px; }
+.totals b { color: var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 6px;
+  font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .18s;
+  max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 900px) {
+  .overview, .board { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+  .rail { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .brand small { display: none; }
+  .brand { padding: 0 6px 0 0; white-space: nowrap; }
+  .nav { flex-direction: row; }
+  .nav button { white-space: nowrap; }
+  .who { margin: 0; min-width: 150px; }
+  .who b { display: none; }
+  .who label { display: none; }
+  main { padding: 20px 16px 48px; }
+  .bar-row { grid-template-columns: 1fr 64px; }
+  .bar-row .bar-track { grid-column: 1 / -1; grid-row: 2; }
+  .row { grid-template-columns: 1fr; }
+  .row-actions { justify-content: flex-start; }
+  .ev-list button { grid-template-columns: 1fr; }
+  .toolbar select { min-width: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="demo-strip" role="note">
+  <span>Bản demo với dữ liệu mẫu. Mọi thao tác chỉ diễn ra trên trình duyệt của bạn. Đổi vai trò ở cuối thanh bên để xem mỗi cấp thấy gì.</span>
+  <button type="button" data-act="reset">Đặt lại dữ liệu mẫu</button>
+</div>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">Cổng vận hành sự kiện<small>Công ty Mẫu</small></div>
+    <nav class="nav" id="nav" aria-label="Điều hướng chính"></nav>
+    <div class="who">
+      <label for="role">Xem với vai trò</label>
+      <select id="role">
+        <option value="head">Trưởng phòng</option>
+        <option value="staff">Nhân viên</option>
+        <option value="ctv">Cộng tác viên</option>
+      </select>
+      <b id="who-name"></b>
+    </div>
+  </aside>
+  <main id="main" tabindex="-1"></main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* Dữ liệu mẫu: toàn bộ tên người, sự kiện, nhà cung cấp và số liệu đều là hư cấu. */
+
+const DAY = 86400000;
+const TODAY = new Date();
+TODAY.setHours(0, 0, 0, 0);
+const addDays = (n) => new Date(TODAY.getTime() + n * DAY);
+const fmt = (n) => addDays(n).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+
+const ROLES = {
+  head: { label: "Trưởng phòng", name: "Phương Linh", home: "tong-quan" },
+  staff: { label: "Nhân viên", name: "Minh Anh", home: "su-kien" },
+  ctv: { label: "Cộng tác viên", name: "Hải Yến", home: "viec" }
+};
+
+/* offset: số ngày từ hôm nay đến ngày diễn ra sự kiện (âm = đã diễn ra) */
+const EVENTS = [
+  { id: 1, name: "Hội thảo hướng nghiệp tháng 11", place: "Hội trường A", offset: 14, lead: "Minh Anh", ctv: "Hải Yến" },
+  { id: 2, name: "Ngày hội việc làm sinh viên", place: "Sân trường B", offset: 3, lead: "Quốc Bảo", ctv: "Văn Khoa" },
+  { id: 3, name: "Workshop kỹ năng phỏng vấn", place: "Phòng đào tạo C", offset: 0, lead: "Minh Anh", ctv: "Hải Yến" },
+  { id: 4, name: "Talkshow gặp gỡ nhà tuyển dụng", place: "Hội trường D", offset: -6, lead: "Quốc Bảo", ctv: "Văn Khoa" }
+];
+
+const PHASES = [
+  { k: "truoc", label: "Trước sự kiện" },
+  { k: "trong", label: "Trong sự kiện" },
+  { k: "sau", label: "Sau sự kiện" }
+];
+
+/* off: hạn so với ngày diễn ra; who: người phụ trách */
+const TEMPLATE = [
+  { phase: "truoc", text: "Chốt kịch bản và timeline", off: -10, who: "lead" },
+  { phase: "truoc", text: "Xác nhận nhà cung cấp sân khấu và âm thanh", off: -7, who: "lead" },
+  { phase: "truoc", text: "Gửi thư mời và xác nhận khách mời", off: -5, who: "ctv" },
+  { phase: "truoc", text: "In ấn tài liệu và standee", off: -2, who: "ctv" },
+  { phase: "trong", text: "Đón khách và check-in", off: 0, who: "ctv" },
+  { phase: "trong", text: "Giám sát chương trình theo timeline", off: 0, who: "lead" },
+  { phase: "trong", text: "Chụp ảnh và quay tư liệu", off: 0, who: "ctv" },
+  { phase: "sau", text: "Tổng hợp phản hồi của khách tham dự", off: 2, who: "lead" },
+  { phase: "sau", text: "Nộp hồ sơ thanh toán nhà cung cấp", off: 3, who: "head" },
+  { phase: "sau", text: "Báo cáo kết quả sự kiện", off: 5, who: "lead" }
+];
+
+const FOLDERS = [
+  { name: "Kế hoạch và kịch bản", files: ["Kịch bản chương trình", "Timeline chi tiết", "Dự trù ngân sách"], roles: ["head", "staff"] },
+  { name: "Nhà cung cấp", files: ["Báo giá", "Hợp đồng", "Biên bản nghiệm thu"], roles: ["head", "staff"] },
+  { name: "Truyền thông", files: ["Thư mời", "Thiết kế standee", "Bài đăng"], roles: ["head", "staff", "ctv"] },
+  { name: "Hiện trường", files: ["Danh sách check-in", "Ảnh sự kiện", "Video tư liệu"], roles: ["head", "staff", "ctv"] },
+  { name: "Báo cáo và thanh toán", files: ["Báo cáo kết quả", "Hồ sơ thanh toán"], roles: ["head", "staff"] }
+];
+
+function buildItems() {
+  const items = [];
+  let id = 1;
+  EVENTS.forEach((e) => {
+    TEMPLATE.forEach((t, i) => {
+      const due = e.offset + t.off;
+      items.push({
+        id: id++, ev: e.id, phase: t.phase, text: t.text, due,
+        owner: t.who === "lead" ? e.lead : t.who === "ctv" ? e.ctv : ROLES.head.name,
+        done: due < -1 ? (e.id + i) % 4 !== 0 : false
+      });
+    });
+  });
+  return items;
+}
+
+const SEED = {
+  items: buildItems(),
+  approvals: [
+    { id: 1, title: "Mua vật tư in ấn đợt 2", by: "Quốc Bảo", kind: "Chi phí", amount: 18500000, status: "cho" },
+    { id: 2, title: "Thuê thêm 2 nhân sự hỗ trợ ngày sự kiện", by: "Văn Khoa", kind: "Nhân sự", amount: 6000000, status: "cho" },
+    { id: 3, title: "Đổi địa điểm họp đối tác sang phòng lớn hơn", by: "Minh Anh", kind: "Cơ sở vật chất", amount: 0, status: "cho" },
+    { id: 4, title: "Tăng ngân sách quà tặng khách mời", by: "Minh Anh", kind: "Chi phí", amount: 4200000, status: "cho" },
+    { id: 5, title: "Nghỉ phép 2 ngày sau sự kiện", by: "Hải Yến", kind: "Nhân sự", amount: 0, status: "ok" },
+    { id: 6, title: "Gia hạn hợp đồng thuê thiết bị", by: "Quốc Bảo", kind: "Chi phí", amount: 9800000, status: "no" }
+  ],
+  payments: [
+    { id: 1, vendor: "Sân khấu Sao Mai", ref: "HD-014", amount: 32000000, due: "10/10", status: "cho" },
+    { id: 2, vendor: "In ấn Bình Minh", ref: "HD-017", amount: 18500000, due: "05/10", status: "late" },
+    { id: 3, vendor: "Âm thanh ánh sáng Đại Phát", ref: "HD-011", amount: 24500000, due: "12/10", status: "cho" },
+    { id: 4, vendor: "Quà tặng Hoa Nắng", ref: "HD-020", amount: 7200000, due: "30/09", status: "ok" },
+    { id: 5, vendor: "Catering Bếp Xanh", ref: "HD-016", amount: 15800000, due: "06/10", status: "late" },
+    { id: 6, vendor: "Thiết kế Nét Việt", ref: "HD-009", amount: 9000000, due: "28/09", status: "ok" },
+    { id: 7, vendor: "Vận chuyển Nhanh Việt", ref: "HD-022", amount: 3600000, due: "15/10", status: "cho" }
+  ]
+};
+
+let S = structuredClone(SEED);
+let role = "head";
+let view = ROLES.head.home;
+let selEv = 1;
+let docEv = 1;
+let apFilter = "cho";
+let payFilter = "all";
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const vnd = (n) => n.toLocaleString("vi-VN") + " đ";
+const mil = (n) => (n / 1000000).toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + " triệu";
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const evById = (id) => EVENTS.find((e) => e.id === id);
+const me = () => ROLES[role].name;
+
+const AP_LABEL = { cho: "Chờ duyệt", ok: "Đã duyệt", no: "Đã từ chối" };
+const AP_CHIP = { cho: "cho", ok: "ok", no: "off" };
+const PAY_LABEL = { cho: "Chờ chi", late: "Quá hạn", ok: "Đã chi" };
+const PAY_CHIP = { cho: "cho", late: "late", ok: "ok" };
+
+/* ---------- Truy vấn theo vai trò ---------- */
+
+const pending = () => S.approvals.filter((a) => a.status === "cho");
+const latePays = () => S.payments.filter((p) => p.status === "late");
+const sumPay = (st) => S.payments.filter((p) => p.status === st).reduce((n, p) => n + p.amount, 0);
+const lateItems = (list) => list.filter((i) => !i.done && i.due < 0);
+const myItems = () => S.items.filter((i) => i.owner === me());
+
+function visibleEvents() {
+  if (role === "head") return EVENTS;
+  if (role === "staff") return EVENTS.filter((e) => e.lead === me());
+  return EVENTS.filter((e) => S.items.some((i) => i.ev === e.id && i.owner === me()));
+}
+function itemsOfEvent(id) {
+  const list = S.items.filter((i) => i.ev === id);
+  return role === "ctv" ? list.filter((i) => i.owner === me()) : list;
+}
+
+/* ---------- Thành phần giao diện ---------- */
+
+const NAV = [
+  { id: "tong-quan", label: "Tổng quan", roles: ["head"] },
+  { id: "su-kien", label: "Sự kiện", roles: ["head", "staff"] },
+  { id: "viec", label: "Việc của tôi", roles: ["head", "staff", "ctv"], badge: () => lateItems(myItems()).length, late: true },
+  { id: "tai-lieu", label: "Tài liệu", roles: ["head", "staff", "ctv"] },
+  { id: "phe-duyet", label: "Phê duyệt", roles: ["head"], badge: () => pending().length },
+  { id: "thanh-toan", label: "Thanh toán", roles: ["head"], badge: () => latePays().length, late: true },
+  { id: "bao-cao", label: "Báo cáo", roles: ["head"] }
+];
+
+function renderNav() {
+  $("#nav").innerHTML = NAV.filter((n) => n.roles.includes(role)).map((n) => {
+    const count = n.badge ? n.badge() : 0;
+    const badge = count ? `<span class="badge${n.late ? " late" : ""}">${count}</span>` : "";
+    return `<button type="button" data-view="${n.id}"${n.id === view ? ' aria-current="page"' : ""}>${esc(n.label)}${badge}</button>`;
+  }).join("");
+  $("#role").value = role;
+  $("#who-name").textContent = `${ROLES[role].name}, ${ROLES[role].label.toLowerCase()}`;
+}
+
+const head = (title, sub) => `<div class="page-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`;
+
+function dueChip(it) {
+  if (it.done) return '<span class="chip ok">Đã xong</span>';
+  if (it.due < 0) return `<span class="chip late">Trễ ${-it.due} ngày</span>`;
+  if (it.due === 0) return '<span class="chip cho">Hôm nay</span>';
+  if (it.due <= 2) return `<span class="chip cho">Còn ${it.due} ngày</span>`;
+  return `<span class="chip off">Hạn ${fmt(it.due)}</span>`;
+}
+
+function eventChip(e) {
+  if (e.offset > 0) return `<span class="chip off">Còn ${e.offset} ngày</span>`;
+  if (e.offset === 0) return '<span class="chip ok">Diễn ra hôm nay</span>';
+  return '<span class="chip off">Đã diễn ra</span>';
+}
+
+function itemRow(it, showEvent) {
+  const ev = evById(it.ev);
+  return `<li class="row${it.done ? " done" : ""}"><div><div class="row-title">${esc(it.text)} ${dueChip(it)}</div>
+    <div class="row-meta">${showEvent ? esc(ev.name) + " · " : ""}${esc(it.owner)} · ${fmt(it.due)}</div></div>
+    <div class="row-actions"><button class="btn${it.done ? "" : " primary"}" data-act="toggle" data-id="${it.id}">${it.done ? "Mở lại" : "Hoàn thành"}</button></div></li>`;
+}
+
+function queueRow(kind, title, meta, actions) {
+  return `<li class="row"><div><div class="row-title">${esc(title)}</div><div class="row-meta">${esc(kind)} · ${esc(meta)}</div></div><div class="row-actions">${actions}</div></li>`;
+}
+
+function evProgress(id) {
+  const list = S.items.filter((i) => i.ev === id);
+  const done = list.filter((i) => i.done).length;
+  return { done, total: list.length, late: lateItems(list).length };
+}
+
+function progressBar(done, total, late) {
+  const lateN = late || 0;
+  return `<div class="bar-track" aria-hidden="true"><i style="width:${pct(done, total)}%;background:var(--bar-done)"></i><i style="width:${pct(lateN, total)}%;background:var(--bar-late)"></i></div>`;
+}
+
+/* ---------- Các màn hình ---------- */
+
+function viewOverview() {
+  const today = new Date().toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long" });
+  const queue = [];
+  pending().forEach((a) => queue.push(queueRow("Cần duyệt", a.title, `${a.by}${a.amount ? " · " + vnd(a.amount) : ""}`,
+    `<button class="btn primary" data-act="approve" data-id="${a.id}">Duyệt</button><button class="btn" data-act="reject" data-id="${a.id}">Từ chối</button>`)));
+  latePays().forEach((p) => queue.push(queueRow("Thanh toán quá hạn", `${p.vendor} (${p.ref})`, `${vnd(p.amount)} · hạn ${p.due}`,
+    `<button class="btn primary" data-act="pay" data-id="${p.id}">Đánh dấu đã chi</button>`)));
+  lateItems(S.items).forEach((i) => queue.push(queueRow("Việc trễ hạn", i.text, `${evById(i.ev).name} · ${i.owner} · trễ ${-i.due} ngày`,
+    `<button class="btn" data-act="remind" data-id="${i.id}">Nhắc ${esc(i.owner)}</button>`)));
+  const shown = queue.slice(0, 8);
+
+  const soon = S.items.filter((i) => !i.done && i.due >= 0 && i.due <= 2).length;
+  return head("Tổng quan", `Hôm nay, ${today}`) + `
+  <div class="overview">
+    <section class="panel" aria-labelledby="q-h">
+      <div class="panel-head"><h2 id="q-h">Cần bạn xử lý</h2><span>${queue.length} mục</span></div>
+      ${shown.length ? `<ul class="rows">${shown.join("")}</ul>${queue.length > shown.length ? `<p class="note">Còn ${queue.length - shown.length} mục nữa. Xử lý các mục trên để xem tiếp.</p>` : ""}`
+        : `<p class="empty">Đã xử lý hết các mục cần chú ý. Bấm "Đặt lại dữ liệu mẫu" ở đầu trang để chạy lại demo.</p>`}
+    </section>
+    <section class="panel" aria-labelledby="s-h">
+      <div class="panel-head"><h2 id="s-h">Số liệu nhanh</h2></div>
+      <dl class="stats">
+        <div><dt>Sự kiện sắp và đang diễn ra</dt><dd>${EVENTS.filter((e) => e.offset >= 0).length}</dd></div>
+        <div><dt>Việc trễ hạn</dt><dd class="${lateItems(S.items).length ? "warn" : ""}">${lateItems(S.items).length}</dd></div>
+        <div><dt>Việc đến hạn trong 2 ngày</dt><dd>${soon}</dd></div>
+        <div><dt>Yêu cầu chờ duyệt</dt><dd>${pending().length}</dd></div>
+        <div><dt>Khoản quá hạn</dt><dd class="${latePays().length ? "warn" : ""}">${mil(sumPay("late"))}</dd></div>
+      </dl>
+    </section>
+  </div>
+  <section class="panel" aria-labelledby="p-h">
+    <div class="panel-head"><h2 id="p-h">Tiến độ checklist theo sự kiện</h2></div>
+    <div class="bars">${EVENTS.map((e) => { const p = evProgress(e.id); return `
+      <div class="bar-row"><span class="bar-label">${esc(e.name)}</span>${progressBar(p.done, p.total, p.late)}<span class="bar-val">${p.done}/${p.total}</span></div>`; }).join("")}</div>
+    <div class="legend"><span style="--c:var(--bar-done)">Đã xong</span><span style="--c:var(--bar-late)">Trễ hạn</span></div>
+  </section>`;
+}
+
+function viewEvents() {
+  const evs = visibleEvents();
+  if (!evs.some((e) => e.id === selEv)) selEv = evs.length ? evs[0].id : 0;
+  const ev = evById(selEv);
+  const list = `<section class="panel" aria-labelledby="e-h">
+    <div class="panel-head"><h2 id="e-h">Sự kiện</h2><span>${evs.length} sự kiện</span></div>
+    <ul class="ev-list">${evs.map((e) => { const p = evProgress(e.id); return `<li><button type="button" data-ev="${e.id}"${e.id === selEv ? ' aria-current="true"' : ""}>
+      <span><span class="ev-name">${esc(e.name)}</span> ${eventChip(e)}<br><span class="ev-meta">${fmt(e.offset)} · ${esc(e.place)} · phụ trách ${esc(e.lead)}</span></span>
+      <span class="ev-prog"><span>${p.done}/${p.total} việc xong${p.late ? `, ${p.late} trễ` : ""}</span>${progressBar(p.done, p.total, p.late)}</span></button></li>`; }).join("")}</ul>
+  </section>`;
+  if (!ev) return head("Sự kiện", "Chưa có sự kiện nào.") + list;
+  const cols = PHASES.map((ph) => {
+    const rows = itemsOfEvent(ev.id).filter((i) => i.phase === ph.k);
+    const done = rows.filter((i) => i.done).length;
+    return `<section class="panel" aria-labelledby="ph-${ph.k}">
+      <div class="panel-head"><h2 id="ph-${ph.k}">${ph.label}</h2><span>${done}/${rows.length}</span></div>
+      <ul class="rows">${rows.map((i) => itemRow(i, false)).join("")}</ul></section>`;
+  }).join("");
+  return head("Sự kiện", "Checklist trước, trong và sau sự kiện. Việc đến hạn được nhắc tự động.") + list +
+    `<div class="board" aria-label="Checklist: ${esc(ev.name)}">${cols}</div>`;
+}
+
+function viewMyWork() {
+  const mine = myItems().sort((a, b) => a.due - b.due);
+  const open = mine.filter((i) => !i.done);
+  const done = mine.filter((i) => i.done);
+  const sub = role === "ctv" ? "Cộng tác viên chỉ thấy các việc được giao cho mình." : "Các việc được giao cho bạn, việc gần hạn nhất ở trên cùng.";
+  return head("Việc của tôi", sub) + `
+  <section class="panel" aria-labelledby="m-h">
+    <div class="panel-head"><h2 id="m-h">Cần làm</h2><span>${open.length} việc</span></div>
+    ${open.length ? `<ul class="rows">${open.map((i) => itemRow(i, true)).join("")}</ul>` : `<p class="empty">Bạn đã hoàn thành mọi việc được giao.</p>`}
+  </section>
+  <section class="panel" aria-labelledby="d-h">
+    <div class="panel-head"><h2 id="d-h">Đã xong</h2><span>${done.length} việc</span></div>
+    ${done.length ? `<ul class="rows">${done.map((i) => itemRow(i, true)).join("")}</ul>` : `<p class="empty">Chưa có việc nào hoàn thành.</p>`}
+  </section>`;
+}
+
+function viewDocs() {
+  const evs = visibleEvents();
+  if (!evs.some((e) => e.id === docEv)) docEv = evs.length ? evs[0].id : 0;
+  const ev = evById(docEv);
+  const folders = FOLDERS.filter((f) => f.roles.includes(role));
+  const hidden = FOLDERS.length - folders.length;
+  const sub = "Mỗi sự kiện có cùng một cấu trúc thư mục, đồng bộ với Drive của team.";
+  if (!ev) return head("Tài liệu", sub) + `<p class="empty">Chưa có sự kiện nào để hiển thị.</p>`;
+  return head("Tài liệu", sub) + `
+  <div class="toolbar">
+    <label class="sr" for="docev">Chọn sự kiện</label>
+    <select id="docev" data-docev>${evs.map((e) => `<option value="${e.id}"${e.id === docEv ? " selected" : ""}>${esc(e.name)}</option>`).join("")}</select>
+    <button class="btn primary" data-act="sync">Đồng bộ với Drive</button>
+    <span class="path">Drive / Sự kiện / ${esc(ev.name)}</span>
+  </div>
+  <section class="panel">
+    <ul class="folders">${folders.map((f, fi) => `<li>
+      <div class="folder-name"><span>${esc(f.name)}</span><span class="row-meta">${f.files.filter((_, i) => (ev.id + fi + i) % 4 !== 0).length}/${f.files.length} tệp</span></div>
+      <ul class="files">${f.files.map((name, i) => { const has = (ev.id + fi + i) % 4 !== 0;
+        return `<li><span>${esc(name)}</span>${has ? '<span class="chip ok">Đã có</span>' : '<span class="chip cho">Chưa có</span>'}</li>`; }).join("")}</ul></li>`).join("")}</ul>
+    ${hidden ? `<p class="note">${hidden} thư mục không hiển thị vì vai trò ${esc(ROLES[role].label.toLowerCase())} không có quyền xem.</p>` : ""}
+  </section>`;
+}
+
+function viewApprovals() {
+  const list = S.approvals.filter((a) => apFilter === "all" || (apFilter === "cho" ? a.status === "cho" : a.status !== "cho"));
+  const tabs = [["cho", "Chờ duyệt"], ["xong", "Đã xử lý"], ["all", "Tất cả"]];
+  return head("Phê duyệt", "Duyệt hoặc từ chối yêu cầu, mọi quyết định đều được lưu lại.") + `
+  <div class="tabs" role="tablist" aria-label="Lọc yêu cầu">${tabs.map(([k, l]) =>
+    `<button type="button" role="tab" data-filter="${k}" aria-selected="${apFilter === k}">${l}</button>`).join("")}</div>
+  <section class="panel">
+    ${list.length ? `<ul class="rows">${list.map((a) => `
+      <li class="row"><div><div class="row-title">${esc(a.title)} <span class="chip ${AP_CHIP[a.status]}">${AP_LABEL[a.status]}</span></div>
+        <div class="row-meta">${esc(a.kind)} · ${esc(a.by)} · ${a.amount ? vnd(a.amount) : "Không phát sinh chi phí"}</div></div>
+        <div class="row-actions">${a.status === "cho"
+          ? `<button class="btn primary" data-act="approve" data-id="${a.id}">Duyệt</button><button class="btn" data-act="reject" data-id="${a.id}">Từ chối</button>`
+          : `<button class="btn" data-act="undo" data-id="${a.id}">Hoàn tác</button>`}</div></li>`).join("")}</ul>`
+      : `<p class="empty">Không có yêu cầu nào trong mục này.</p>`}
+  </section>`;
+}
+
+function viewPayments() {
+  const list = S.payments.filter((p) => payFilter === "all" || p.status === payFilter);
+  const tabs = [["all", "Tất cả"], ["late", "Quá hạn"], ["cho", "Chờ chi"], ["ok", "Đã chi"]];
+  return head("Thanh toán", "Theo dõi khoản phải trả cho nhà cung cấp.") + `
+  <div class="tabs" role="tablist" aria-label="Lọc thanh toán">${tabs.map(([k, l]) =>
+    `<button type="button" role="tab" data-pfilter="${k}" aria-selected="${payFilter === k}">${l}</button>`).join("")}</div>
+  <section class="panel">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nhà cung cấp</th><th>Hợp đồng</th><th>Hạn chi</th><th class="num">Số tiền</th><th>Trạng thái</th><th><span class="sr">Thao tác</span></th></tr></thead>
+      <tbody>${list.length ? list.map((p) => `
+        <tr><td>${esc(p.vendor)}</td><td>${esc(p.ref)}</td><td>${esc(p.due)}</td><td class="num">${vnd(p.amount)}</td>
+        <td><span class="chip ${PAY_CHIP[p.status]}">${PAY_LABEL[p.status]}</span></td>
+        <td>${p.status !== "ok" ? `<button class="btn" data-act="pay" data-id="${p.id}">Đánh dấu đã chi</button>` : ""}</td></tr>`).join("")
+        : `<tr><td colspan="6">Không có khoản nào trong mục này.</td></tr>`}</tbody>
+    </table></div>
+    <div class="totals"><span>Chờ chi: <b>${vnd(sumPay("cho"))}</b></span><span>Quá hạn: <b>${vnd(sumPay("late"))}</b></span><span>Đã chi: <b>${vnd(sumPay("ok"))}</b></span></div>
+  </section>`;
+}
+
+function stacked(parts, total) {
+  return `<div class="bar-track" aria-hidden="true">${parts.map((p) => `<i style="width:${pct(p.v, total)}%;background:${p.c}"></i>`).join("")}</div>`;
+}
+
+function viewReports() {
+  const total = S.items.length;
+  const done = S.items.filter((i) => i.done).length;
+  const late = lateItems(S.items).length;
+  const payTotal = S.payments.reduce((n, p) => n + p.amount, 0);
+  const apTotal = S.approvals.length;
+  const apDone = S.approvals.filter((a) => a.status !== "cho").length;
+  return head("Báo cáo", "Số liệu tự tổng hợp từ dữ liệu bên trên, không cần làm bảng tính tay.") + `
+  <section class="panel" aria-labelledby="r1">
+    <div class="panel-head"><h2 id="r1">Checklist theo giai đoạn</h2><span>${pct(done, total)}% hoàn thành, ${late} việc trễ hạn</span></div>
+    <div class="bars">${PHASES.map((ph) => { const l = S.items.filter((i) => i.phase === ph.k); const d = l.filter((i) => i.done).length;
+      return `<div class="bar-row"><span class="bar-label">${ph.label}</span>${progressBar(d, l.length, lateItems(l).length)}<span class="bar-val">${d}/${l.length}</span></div>`; }).join("")}</div>
+    <div class="legend"><span style="--c:var(--bar-done)">Đã xong</span><span style="--c:var(--bar-late)">Trễ hạn</span></div>
+  </section>
+  <section class="panel" aria-labelledby="r2">
+    <div class="panel-head"><h2 id="r2">Thanh toán nhà cung cấp</h2><span>Tổng ${vnd(payTotal)}</span></div>
+    <div class="bars"><div class="bar-row"><span class="bar-label">Theo số tiền</span>
+      ${stacked([{ v: sumPay("ok"), c: "var(--bar-done)" }, { v: sumPay("cho"), c: "var(--bar-mid)" }, { v: sumPay("late"), c: "var(--bar-late)" }], payTotal)}
+      <span class="bar-val">${pct(sumPay("ok"), payTotal)}%</span></div></div>
+    <div class="legend"><span style="--c:var(--bar-done)">Đã chi ${mil(sumPay("ok"))}</span><span style="--c:var(--bar-mid)">Chờ chi ${mil(sumPay("cho"))}</span><span style="--c:var(--bar-late)">Quá hạn ${mil(sumPay("late"))}</span></div>
+  </section>
+  <section class="panel" aria-labelledby="r3">
+    <div class="panel-head"><h2 id="r3">Xử lý yêu cầu duyệt</h2><span>${apDone}/${apTotal} đã xử lý</span></div>
+    <div class="bars"><div class="bar-row"><span class="bar-label">${apTotal} yêu cầu</span>
+      ${stacked([{ v: apDone, c: "var(--bar-done)" }, { v: apTotal - apDone, c: "var(--bar-mid)" }], apTotal)}
+      <span class="bar-val">${pct(apDone, apTotal)}%</span></div></div>
+  </section>`;
+}
+
+const VIEWS = { "tong-quan": viewOverview, "su-kien": viewEvents, "viec": viewMyWork, "tai-lieu": viewDocs, "phe-duyet": viewApprovals, "thanh-toan": viewPayments, "bao-cao": viewReports };
+
+function render(focusMain) {
+  if (!NAV.find((n) => n.id === view && n.roles.includes(role))) view = ROLES[role].home;
+  renderNav();
+  $("#main").innerHTML = VIEWS[view]();
+  if (focusMain) $("#main").focus({ preventScroll: true });
+}
+
+/* ---------- Thao tác ---------- */
+
+let toastTimer;
+function toast(msg) {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+const ACTIONS = {
+  approve(id) { const a = S.approvals.find((x) => x.id === id); a.status = "ok"; toast(`Đã duyệt: ${a.title}`); },
+  reject(id) { const a = S.approvals.find((x) => x.id === id); a.status = "no"; toast(`Đã từ chối: ${a.title}`); },
+  undo(id) { const a = S.approvals.find((x) => x.id === id); a.status = "cho"; toast(`Đã hoàn tác: ${a.title}`); },
+  pay(id) { const p = S.payments.find((x) => x.id === id); p.status = "ok"; toast(`Đã đánh dấu đã chi: ${p.vendor}`); },
+  remind(id) { const i = S.items.find((x) => x.id === id); toast(`Đã gửi nhắc tới ${i.owner} (demo, chưa gửi tin thật)`); },
+  toggle(id) { const i = S.items.find((x) => x.id === id); i.done = !i.done; toast(i.done ? `Đã hoàn thành: ${i.text}` : `Đã mở lại: ${i.text}`); },
+  sync() { toast("Đã đồng bộ (demo, chưa kết nối Drive thật)"); },
+  reset() { S = structuredClone(SEED); apFilter = "cho"; payFilter = "all"; toast("Đã đặt lại dữ liệu mẫu"); }
+};
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.view) { view = t.dataset.view; render(true); return; }
+  if (t.dataset.ev) { selEv = Number(t.dataset.ev); render(); return; }
+  if (t.dataset.filter) { apFilter = t.dataset.filter; render(); return; }
+  if (t.dataset.pfilter) { payFilter = t.dataset.pfilter; render(); return; }
+  const act = t.dataset.act;
+  if (act && ACTIONS[act]) { ACTIONS[act](Number(t.dataset.id)); render(); }
+});
+
+document.addEventListener("change", (e) => {
+  if (e.target.id === "role") {
+    role = e.target.value;
+    view = ROLES[role].home;
+    toast(`Đang xem với vai trò ${ROLES[role].label.toLowerCase()}`);
+    render(true);
+  } else if (e.target.dataset.docev !== undefined) {
+    docEv = Number(e.target.value);
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
