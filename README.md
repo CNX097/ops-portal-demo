@@ -1,6 +1,6 @@
 # ops-portal-demo
 
-Bản demo cho portal quản lý vận hành nội bộ của team: giao việc, duyệt yêu cầu, theo dõi thanh toán nhà cung cấp và xem báo cáo tiến độ ở một nơi.
+ERP_SMES Demo: bản demo portal quản lý vận hành nội bộ cho team doanh nghiệp vừa và nhỏ: giao việc, duyệt yêu cầu, theo dõi thanh toán nhà cung cấp và xem báo cáo tiến độ ở một nơi.
 
 Repo này công khai nên chỉ chứa bản demo với dữ liệu mẫu. Proposal và báo giá nằm ở repo riêng tư `claude-workspace` (thư mục `docs/ops-portal/`).
 
