@@ -265,6 +265,56 @@ td.num, th.num { text-align: right; }
 @media (max-width: 560px) {
   .stats, .kanban { grid-template-columns: 1fr; }
 }
+
+.meta { color: var(--ink-soft); font-size: 12.5px; }
+.legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 4px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart .hit:hover { fill: rgba(15,118,110,.06); }
+.grid-eq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.stats.s3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stats.s5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.stats.s5 .stat { padding: 14px 12px; gap: 10px; } .stats.s5 .ico { width: 38px; height: 38px; }
+.hb { margin: 10px 0; } .hb-l { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.hb-l b small { color: var(--ink-soft); font-weight: 500; } .drop { color: var(--red); }
+.hb-bar { height: 8px; background: var(--slate-wash); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.hb-bar i { display: block; height: 100%; background: #0d9488; border-radius: 4px; }
+.mini2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.mini2 div { background: var(--bg); border-radius: 10px; padding: 8px 12px; } .mini2 small { display: block; color: var(--ink-soft); } .mini2 b { font-size: 18px; }
+.h3 { margin: 0; font-size: 14.5px; }
+.segs { display: flex; gap: 8px; margin: 0 0 14px; flex-wrap: wrap; }
+.seg { border: 1px solid var(--line); background: #fff; border-radius: 20px; padding: 4px 14px; font-size: 13.5px; font-weight: 500; }
+.seg.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.plan { border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.plan .lbl { font-weight: 600; } .plan .num { font-size: 24px; font-weight: 700; margin-top: 6px; } .plan .num small { font-size: 15px; color: var(--ink-soft); font-weight: 500; }
+.plan .sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; } .plan .amber { color: var(--amber); }
+.num-in { width: 84px; text-align: right; padding: 5px 8px; }
+.pcounts { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.pcount { background: var(--card); border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 2px rgba(18,48,47,.06); }
+.pcount small { display: block; color: var(--ink-soft); font-size: 12px; line-height: 1.3; } .pcount b { font-size: 22px; }
+select.pstat { padding: 3px 8px; border-radius: 12px; font-size: 12.5px; font-weight: 600; border: 0; }
+select.pstat.slate { background: var(--slate-wash); } select.pstat.violet { background: var(--violet-wash); color: var(--violet); }
+select.pstat.green { background: var(--green-wash); color: var(--green); } select.pstat.amber { background: var(--amber-wash); color: var(--amber); }
+select.pstat.teal { background: var(--teal-wash); color: var(--teal-d); } select.pstat.red { background: var(--red-wash); color: var(--red); }
+.board-scroll { overflow-x: auto; padding-bottom: 6px; }
+.pboard { display: grid; grid-template-columns: repeat(7, 220px); gap: 12px; align-items: start; }
+.kmove { display: flex; justify-content: flex-end; gap: 2px; margin-top: 4px; }
+.docs-grid { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 18px; align-items: start; }
+.dg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding-right: 18px; }
+.dg-head .link { margin-top: 12px; font-size: 13px; }
+.dg-head small { display: block; padding: 0 18px 8px; color: var(--ink-soft); }
+.file small.when { min-width: 80px; text-align: right; }
+.file .fi.docx { color: #2563eb; } .file .fi.jpg { color: #7c3aed; }
+.tree { position: sticky; top: 76px; } .tree h2 { font-size: 14.5px; }
+ul.tr, ul.tr ul { list-style: none; margin: 0; padding: 0 0 0 14px; font-size: 12.5px; line-height: 1.5; }
+ul.tr { padding: 0 18px 10px; } ul.tr li { padding: 2px 0; } ul.tr svg.i { width: 14px; height: 14px; color: #d97706; vertical-align: -2px; }
+@media (max-width: 1000px) {
+  .grid-eq, .docs-grid { grid-template-columns: 1fr; }
+  .stats.s3, .stats.s5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pcounts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tree { position: static; }
+}
+@media (max-width: 560px) { .stats.s3, .stats.s5, .pcounts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 </style>
 </head>
@@ -706,31 +756,356 @@ function viewBudget() {
 
 /* --- Tài liệu --- */
 const DF = { tab: "ev", q: "", folder: "" };
-function docGroups() {
+/* ---------- Dùng chung cho các màn mới ---------- */
+const STAT = (color, icon, label, num, sub) => `<div class="stat"><div class="ico" style="background:${color}">${ic(icon)}</div><div><div class="lbl">${label}</div><div class="num">${num}</div><div class="sub">${sub}</div></div></div>`;
+let _seed = 20261009;
+const rnd = () => (_seed = (_seed * 16807) % 2147483647) / 2147483647;
+const pick = (a) => a[Math.floor(rnd() * a.length)];
+const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
+const UI = { pt: "list", pq: "", parea: "", ppic: "", st: "overview", sf: { sch: "", ch: "", ev: "", from: "", to: "" }, perf: "perf", per: "month", ptype: false };
+const dayOf = (iso) => Math.round((new Date(iso + "T00:00:00").getTime() - T0.getTime()) / DAY);
+const isoOf = (n) => { const d = dt(n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const ago = (n) => n === 0 ? "hôm nay" : n === 1 ? "1 ngày trước" : `${n} ngày trước`;
+
+/* Biểu đồ cột đơn giản bằng SVG: cột mảnh, đầu bo 4px, khe 2px giữa các đoạn chồng, tooltip khi rê chuột */
+function barChart(cats, series, opts = {}) {
+  const W = 560, H = 210, L = 34, R = 8, Tp = 12, B = 26;
+  const totals = cats.map((_, i) => series.reduce((s, x) => s + x.values[i], 0));
+  const max = Math.max(4, ...totals);
+  const step = Math.ceil(max / 4);
+  const top = step * 4;
+  const y = (v) => Tp + (H - Tp - B) * (1 - v / top);
+  const bw = Math.min(28, (W - L - R) / cats.length * 0.42);
+  const cx = (i) => L + (W - L - R) * (i + 0.5) / cats.length;
+  let g = "";
+  for (let k = 0; k <= 4; k++) { const v = step * k; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e3ecea" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#5b7270">${v}</text>`; }
+  cats.forEach((c, i) => {
+    let base = 0; const tip = [`${c}`].concat(series.map((s) => `${s.name}: ${s.values[i]}`)).join(" · ");
+    const segs = series.map((s) => ({ s, v: s.values[i] })).filter((x) => x.v > 0);
+    segs.forEach((x, j) => {
+      const y1 = y(base + x.v), y0 = y(base); base += x.v;
+      const last = j === segs.length - 1;
+      const h = Math.max(0, y0 - y1 - (j > 0 ? 2 : 0));
+      const x0 = cx(i) - bw / 2;
+      g += last
+        ? `<path d="M${x0},${y1 + h} v${-(h - 4)} q0,-4 4,-4 h${bw - 8} q4,0 4,4 v${h - 4} z" fill="${x.s.color}"/>`
+        : `<rect x="${x0}" y="${y1}" width="${bw}" height="${h}" fill="${x.s.color}"/>`;
+    });
+    if (i % (opts.every || 1) === (cats.length - 1) % (opts.every || 1)) g += `<text x="${cx(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#5b7270">${esc(c)}</text>`;
+    g += `<rect class="hit" x="${cx(i) - (W - L - R) / cats.length / 2}" y="${Tp}" width="${(W - L - R) / cats.length}" height="${H - Tp - B}" fill="transparent"><title>${esc(tip)}</title></rect>`;
+  });
+  const legend = series.length > 1 ? `<div class="legend">${series.map((s) => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}</div>` : "";
+  return `${legend}<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label || "")}">${g}</svg>`;
+}
+
+/* ---------- Đối tác & Trường ---------- */
+const P_STATUS = [["Chưa tiếp cận", "slate"], ["Đã tiếp cận", "slate"], ["Đang trao đổi", "violet"], ["Đã hợp tác sự kiện", "green"], ["Đang đàm phán MOU", "amber"], ["Đã ký MOU", "teal"], ["Tạm dừng", "red"]];
+const PARTNER_SEED = [
+  ["ALP", "ĐH Alpha", "Đại học", "Hà Nội", 5, ["Cô Lan", "Phó phòng Công tác sinh viên"], "TT", 2, -40, true],
+  ["BRV", "ĐH Bravo", "Đại học", "TP.HCM", 4, ["Anh Quân", "Trung tâm Hỗ trợ sinh viên"], "HN", 1, null, true],
+  ["CHA", "ĐH Charlie", "Đại học", "TP.HCM", 2, null, "", 6, null, false],
+  ["DLT", "CĐ Delta", "Cao đẳng", "Hà Nội", 3, ["Chị Hà", "Phòng Đào tạo"], "TT", 4, null, false],
+  ["ECH", "Học viện Echo", "Học viện", "Hà Nội", 5, ["Thầy Phong", "Phòng Công tác HSSV"], "TT", 3, -75, false],
+  ["FOX", "ĐH Foxtrot", "Đại học", "Hà Nội", 4, null, "", 1, null, false],
+  ["GLF", "CĐ Golf", "Cao đẳng", "Hà Nội", 4, ["Anh Tùng", "Phó phòng Công tác sinh viên"], "TT", 2, null, false],
+  ["HTL", "CĐ Hotel", "Cao đẳng", "TP.HCM", 3, null, "", 9, null, false],
+  ["IND", "ĐH India", "Đại học", "TP.HCM", 4, null, "", 1, null, true],
+  ["JUL", "ĐH Juliet", "Đại học", "TP.HCM", 3, ["Chị Thảo", "Trung tâm Quan hệ doanh nghiệp"], "HN", 5, null, false],
+  ["KIL", "ĐH Kilo", "Đại học", "Hà Nội", 5, ["Cô Mai", "Phòng Hợp tác"], "TT", 1, -8, false],
+  ["LIM", "ĐH Lima", "Đại học", "Hà Nội", 2, null, "", 12, null, false],
+  ["MIK", "ĐH Mike", "Đại học", "TP.HCM", 1, null, "", 1, null, false],
+  ["NOV", "CĐ November", "Cao đẳng", "TP.HCM", 2, null, "", 20, null, false],
+  ["OSC", "CĐ Oscar", "Cao đẳng", "Hà Nội", 0, null, "", null, null, false],
+  ["PAP", "CĐ Papa", "Cao đẳng", "TP.HCM", 1, null, "", 1, null, false],
+  ["QUE", "ĐH Quebec", "Đại học", "Khác", 2, null, "", 30, null, false],
+  ["ROM", "CĐ Romeo", "Cao đẳng", "Hà Nội", 6, null, "", 60, null, false],
+  ["SIE", "ĐH Sierra", "Đại học", "TP.HCM", 5, ["Anh Long", "Phòng Công tác sinh viên"], "HN", 7, -120, true],
+  ["TAN", "CĐ Tango", "Cao đẳng", "Hà Nội", 0, null, "", null, null, false]
+];
+const PARTNERS_INIT = () => PARTNER_SEED.map(([code, name, kind, area, st, contact, pic, last, mou, key], i) => ({ id: i + 1, code, name, kind, area, st, contact: contact ? { name: contact[0], role: contact[1], phone: "0900 000 " + String(100 + i).padStart(3, "0") } : null, pic, last, mou, key }));
+let PARTNERS = PARTNERS_INIT();
+const evOfSchool = (name) => EVENTS.filter((e) => e.school === name).sort((a, b) => a.off - b.off);
+function partnerEvents(p) {
+  const L = evOfSchool(p.name);
+  if (!L.length) return "–";
+  const next = L.find((e) => e.off >= 0);
+  const e = next || L[L.length - 1];
+  return `<b style="font-weight:600">${L.length} sự kiện</b><div class="meta">${next ? '<span style="color:var(--violet)">Sắp tới' : "Gần nhất"} ${dmy(e.off)}${next ? "</span>" : ""}</div>`;
+}
+function partnerList() {
+  const q = UI.pq.trim().toLowerCase();
+  return PARTNERS.filter((p) => (!q || (p.name + " " + p.code + " " + (p.contact ? p.contact.name : "")).toLowerCase().includes(q)) && (!UI.parea || p.area === UI.parea) && (!UI.ppic || p.pic === UI.ppic))
+    .sort((a, b) => a.name.localeCompare(b.name, "vi"));
+}
+function partnerRows() {
+  const L = partnerList();
+  if (!L.length) return '<tr><td colspan="7"><p class="empty">Không có trường phù hợp bộ lọc.</p></td></tr>';
+  return L.map((p) => `<tr>
+    <td><b style="font-weight:600">${esc(p.name)}</b><div class="meta"><span class="mono" style="font-size:11px">${p.code}</span> ${esc(p.kind)} · ${esc(p.area)}</div>${p.key ? '<span class="chip violet" style="margin-top:4px">Trọng điểm</span>' : ""}</td>
+    <td><select class="field sm pstat ${P_STATUS[p.st][1]}" data-pstatus="${p.id}" aria-label="Trạng thái hợp tác ${esc(p.name)}">${P_STATUS.map(([l], i) => `<option value="${i}"${i === p.st ? " selected" : ""}>${l}</option>`).join("")}</select></td>
+    <td>${p.contact ? `${esc(p.contact.name)}<div class="meta">${esc(p.contact.role)} · ${p.contact.phone}</div>` : '<span class="meta">Chưa có</span>'}</td>
+    <td>${p.pic ? `<span class="who">${av(p.pic, true)} ${esc(PEOPLE[p.pic].name)}</span>` : "–"}</td>
+    <td>${partnerEvents(p)}</td>
+    <td>${p.last === null ? '<span class="meta">Chưa liên hệ</span>' : ago(p.last)}</td>
+    <td>${p.mou !== null && p.st === 5 ? `Ký<div class="meta">${dmy(p.mou)}</div>` : "–"}</td></tr>`).join("");
+}
+function viewPartners() {
+  const counts = P_STATUS.map((_, i) => PARTNERS.filter((p) => p.st === i).length);
+  const tabs = [["list", "Danh sách", PARTNERS.length], ["board", "Bảng tiến trình", 0]];
+  let body;
+  if (UI.pt === "list") {
+    body = `<div class="filters"><input class="field" id="pf-q" type="search" placeholder="Tìm tên trường, mã, đầu mối..." value="${esc(UI.pq)}" aria-label="Tìm trường" style="min-width:240px">
+      <select class="field" id="pf-area" aria-label="Khu vực"><option value="">Mọi khu vực</option>${["Hà Nội", "TP.HCM", "Khác"].map((a) => `<option${UI.parea === a ? " selected" : ""}>${a}</option>`).join("")}</select>
+      <select class="field" id="pf-pic" aria-label="Người phụ trách"><option value="">Mọi người phụ trách</option>${Object.keys(PEOPLE).map((k) => `<option value="${k}"${UI.ppic === k ? " selected" : ""}>${PEOPLE[k].name}</option>`).join("")}</select></div>
+      <section class="card"><div class="table-wrap"><table><thead><tr><th>Trường</th><th>Trạng thái</th><th>Đầu mối chính</th><th>Phụ trách</th><th>Sự kiện</th><th>Liên hệ gần nhất</th><th>MOU</th></tr></thead><tbody id="pbody">${partnerRows()}</tbody></table></div></section>`;
+  } else {
+    body = `<div class="board-scroll"><div class="pboard">${P_STATUS.map(([l, c], i) => `<section class="kcol"><h3>${l}<span class="chip ${c}">${counts[i]}</span></h3>
+      ${PARTNERS.filter((p) => p.st === i).map((p) => `<div class="kcard"><b style="font-weight:600">${esc(p.name)}</b><div class="meta">${esc(p.kind)} · ${esc(p.area)}</div>
+        <div class="meta" style="margin-top:4px">${evOfSchool(p.name).length} sự kiện${p.pic ? " · " + esc(PEOPLE[p.pic].name) : ""}</div>
+        <div class="kmove">${i > 0 ? `<button class="icon-btn" data-act="pmove" data-id="${p.id}" data-dir="-1" aria-label="Lùi một bước">←</button>` : ""}${i < P_STATUS.length - 1 ? `<button class="icon-btn" data-act="pmove" data-id="${p.id}" data-dir="1" aria-label="Tiến một bước">→</button>` : ""}</div></div>`).join("") || '<p class="meta" style="padding:0 6px">Trống</p>'}</section>`).join("")}</div></div>`;
+  }
+  return head("Đối tác & Trường", "Hồ sơ trường, đầu mối, tiến trình hợp tác từ tiếp cận đến ký MOU và lịch sự kiện thường niên.",
+    `<button class="btn" data-act="sheet">${ic("sheet")} Sheet database</button><button class="btn" data-act="import">${ic("sheet")} Nhập từ sự kiện & sheet</button><button class="btn" data-act="yearplan">${ic("cal")} Kế hoạch năm</button><button class="btn primary" data-act="addschool">${ic("plus")} Thêm trường</button>`) + `
+  <div class="pcounts">${P_STATUS.map(([l], i) => `<div class="pcount"><small>${i < 6 ? i + 1 + ". " : "– "}${l}</small><b>${counts[i]}</b></div>`).join("")}</div>
+  <div class="tabs">${tabs.map(([k, l, n]) => `<a href="#/doi-tac" data-ui="pt=${k}"${UI.pt === k ? ' aria-current="page"' : ""}>${l}${n ? `<span class="n">${n}</span>` : ""}</a>`).join("")}</div>${body}`;
+}
+
+/* ---------- Khảo sát SV ---------- */
+const SV_SCHOOLS = [["ALP", "ĐH Alpha", 9], ["BRV", "ĐH Bravo", 3], ["ECH", "Học viện Echo", 2], ["DLT", "CĐ Delta", 1], ["JUL", "ĐH Juliet", 1], ["FOX", "ĐH Foxtrot", 1]];
+const SV_CH = ["jobfair", "fanpage-truong", "qr-gianhang", "email-sv"];
+const MAJORS = ["Quản trị kinh doanh", "Công nghệ thông tin", "Kế toán", "Marketing", "Ngôn ngữ Anh", "Truyền thông đa phương tiện", "Tài chính - Ngân hàng", "Logistics", "Luật kinh tế", "Du lịch - Khách sạn", "Thiết kế đồ họa", "Kinh tế"];
+const HO = ["Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Vũ", "Đặng", "Bùi", "Đỗ", "Ngô"];
+const DEM = ["Văn", "Thị", "Minh", "Thu", "Đức", "Ngọc", "Hải", "Thanh"];
+const TEN = ["An", "Bình", "Châu", "Dũng", "Giang", "Hiếu", "Khánh", "Linh", "My", "Nam", "Phương", "Quỳnh", "Sơn", "Trang", "Vy", "Yến"];
+const RESP = (() => {
+  _seed = 4242;
+  const W = SV_SCHOOLS.flatMap(([c, , w]) => Array(w).fill(c));
+  const days = [-17, -15, -12, -9, -6, -5, -4, -2, -1, 0];
+  const dayW = [1, 0, 0, 0, 2, 1, 1, 9, 7, 5];
+  const DW = days.flatMap((d, i) => Array(dayW[i]).fill(d));
+  return Array.from({ length: 520 }, (_, i) => {
+    const sch = pick(W);
+    const evs = evOfSchool(SV_SCHOOLS.find((s) => s[0] === sch)[1]);
+    const r = rnd();
+    const step = r < 0.27 ? 0 : r < 0.275 ? 1 : r < 0.28 ? 2 : r < 0.283 ? 3 : r < 0.287 ? 4 : 5;
+    const y = rnd();
+    return { id: i + 1, sch, ch: sch === "ALP" ? "fanpage-truong" : pick(SV_CH), ev: evs.length ? evs[0].id : null, day: pick(DW), step,
+      app: rnd() < 0.02, by: y < 0.47 ? 2008 : y < 0.75 ? 2007 : y < 0.81 ? 2006 : y < 0.93 ? 2005 : y < 0.97 ? 2004 : 2003 - Math.floor(rnd() * 3),
+      major: MAJORS[Math.min(MAJORS.length - 1, Math.floor(Math.pow(rnd(), 1.6) * MAJORS.length))], sec: 70 + Math.floor(rnd() * 70),
+      name: `${pick(HO)} ${pick(DEM)} ${pick(TEN)}`, hour: 8 + Math.floor(rnd() * 10), min: Math.floor(rnd() * 60) };
+  });
+})();
+const schName = (c) => (SV_SCHOOLS.find((s) => s[0] === c) || [c, c])[1];
+function svFiltered() {
+  const f = UI.sf;
+  const from = f.from ? dayOf(f.from) : -999, to = f.to ? dayOf(f.to) : 999;
+  return RESP.filter((r) => (!f.sch || r.sch === f.sch) && (!f.ch || r.ch === f.ch) && (!f.ev || String(r.ev) === f.ev) && r.day >= from && r.day <= to);
+}
+function svOverview(L) {
+  const sub = L.filter((r) => r.step === 5);
+  const app = L.filter((r) => r.app).length;
+  const secs = sub.map((r) => r.sec).sort((a, b) => a - b);
+  const med = secs.length ? secs[Math.floor(secs.length / 2)] : 0;
+  const today = sub.filter((r) => r.day === 0).length;
+  const funnel = [["Mở trang", 0], ["Bắt đầu điền", 1], ["Xong bước 1", 2], ["Xong bước 2", 3], ["Xong bước 3", 4], ["Nộp phiếu", 5]].map(([l, s]) => [l, L.filter((r) => r.step >= s && (s > 0 || true)).length]);
+  funnel[1][1] = L.filter((r) => r.step >= 1).length;
+  const days = Array.from({ length: 18 }, (_, i) => i - 17);
+  const groups = {};
+  L.forEach((r) => { const k = r.sch + "|" + r.ch; (groups[k] = groups[k] || []).push(r); });
+  const rows = Object.entries(groups).map(([k, rs]) => { const [s, c] = k.split("|"); const n = rs.filter((r) => r.step === 5).length; return { s, c, n, open: rs.length, app: rs.filter((r) => r.app).length, ev: rs[0].ev }; }).sort((a, b) => b.n - a.n);
+  const dist = (key, list) => { const m = {}; sub.forEach((r) => { m[r[key]] = (m[r[key]] || 0) + 1; }); return (list || Object.keys(m)).map((k) => [k, m[k] || 0]); };
+  const majors = dist("major").sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const years = dist("by").sort((a, b) => b[0] - a[0]);
+  const hbar = (label, n, total) => `<div class="hb"><div class="hb-l"><span>${esc(label)}</span><b>${pct(n, total)}%<small> (${n})</small></b></div><div class="hb-bar"><i style="width:${pct(n, total)}%"></i></div></div>`;
+  return `<div class="stats s5">
+    ${STAT("#0f766e", "survey", "Phiếu khảo sát", sub.length, `${new Set(sub.map((r) => r.sch)).size} trường · hôm nay +${today}`)}
+    ${STAT("#0e7490", "user", "Lượt mở phiếu", L.length, "phần lớn mở trên điện thoại")}
+    ${STAT("#15803d", "chart", "Tỷ lệ hoàn thành", pct(sub.length, L.length) + "%", `${sub.length} nộp / ${L.length} lượt mở`)}
+    ${STAT("#b45309", "plus", "Bấm Tải app", app, `${pct(app, L.length)}% người mở phiếu`)}
+    ${STAT("#475569", "clock", "Thời gian điền", `${Math.floor(med / 60)}:${String(med % 60).padStart(2, "0")}`, "phút:giây · trung vị mỗi phiếu")}
+  </div>
+  <div class="grid-eq">
+    <section class="card"><div class="card-head"><div><h2>Phễu khảo sát</h2><p>Số phiên truy cập qua từng bước, mỗi phiên tính 1 lần mỗi bước</p></div></div>
+      <div class="card-pad">${funnel.map(([l, n], i) => `<div class="hb"><div class="hb-l"><span>${l}</span><b>${n} <small>${pct(n, funnel[0][1])}%${i ? ` <span class="drop">${n - funnel[i - 1][1] < 0 ? n - funnel[i - 1][1] : ""}</span>` : ""}</small></b></div><div class="hb-bar"><i style="width:${pct(n, funnel[0][1])}%"></i></div></div>`).join("")}
+      <div class="mini2"><div><small>Mở trang Tải app</small><b>${L.filter((r) => r.app || r.id % 23 === 0).length}</b></div><div><small>Bấm Tải app</small><b>${app}</b></div></div></div></section>
+    <section class="card"><div class="card-head"><div><h2>Phiếu theo ngày</h2><p>Theo thời gian nộp</p></div></div>
+      <div class="card-pad">${barChart(days.map(dm), [{ name: "Phiếu nộp", color: "#0d9488", values: days.map((d) => sub.filter((r) => r.day === d).length) }], { label: "Số phiếu nộp theo ngày trong 18 ngày gần nhất", every: 3 })}</div></section>
+  </div>
+  <section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Theo trường & kênh phát</h2><p>Kênh lấy từ tham số utm_source của link khảo sát; tỷ lệ hoàn thành = nộp phiếu / mở trang. Hiển thị 10 nhóm nhiều phiếu nhất.</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Trường</th><th>Kênh</th><th class="num">Phiếu</th><th class="num">Lượt mở</th><th class="num">Hoàn thành</th><th class="num">Bấm tải app</th><th>Sự kiện</th></tr></thead>
+    <tbody>${rows.length ? rows.slice(0, 10).map((x) => `<tr><td><b style="font-weight:600">${x.s}</b><div class="meta">${esc(schName(x.s))}</div></td><td>${x.c}</td><td class="num">${x.n}</td><td class="num">${x.open}</td><td class="num">${pct(x.n, x.open)}%</td><td class="num">${x.app}</td><td>${x.ev ? `<a class="rowlink" href="#/su-kien/${x.ev}">${esc(evById(x.ev).name)}</a>` : '<span class="meta">Chưa gắn</span>'}</td></tr>`).join("") : '<tr><td colspan="7"><p class="empty">Không có dữ liệu cho bộ lọc này.</p></td></tr>'}</tbody></table></div></section>
+  <section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Chân dung sinh viên</h2><p>Thông tin cá nhân và nhu cầu, tính trên phiếu đã nộp</p></div></div>
+    <div class="grid-eq card-pad"><div><h3 class="h3">Ngành học (nhiều nhất)</h3><p class="meta">${sub.length} SV trả lời</p>${majors.map(([k, n]) => hbar(k, n, sub.length)).join("")}</div>
+      <div><h3 class="h3">Năm sinh</h3><p class="meta">${sub.length} SV trả lời</p>${years.map(([k, n]) => hbar(`${k} (${T0.getFullYear() - k} tuổi)`, n, sub.length)).join("")}</div></div></section>`;
+}
+function svList(L) {
+  const sub = L.filter((r) => r.step === 5).sort((a, b) => b.day - a.day || b.hour - a.hour);
+  return `<section class="card"><div class="card-head"><div><h2>${sub.length} sinh viên đã nộp phiếu</h2><p>Hiển thị 50 phiếu mới nhất. Dữ liệu trong bản demo là hư cấu.</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Họ tên</th><th>Trường</th><th>Ngành</th><th class="num">Năm sinh</th><th>Kênh</th><th>Tải app</th></tr></thead>
+    <tbody>${sub.slice(0, 50).map((r) => `<tr><td>${dm(r.day)} ${String(r.hour).padStart(2, "0")}:${String(r.min).padStart(2, "0")}</td><td>${esc(r.name)}</td><td>${esc(schName(r.sch))}</td><td>${esc(r.major)}</td><td class="num">${r.by}</td><td>${r.ch}</td><td>${r.app ? '<span class="chip green">Đã bấm</span>' : "–"}</td></tr>`).join("") || '<tr><td colspan="7"><p class="empty">Không có phiếu nào.</p></td></tr>'}</tbody></table></div></section>`;
+}
+const svLinks = () => { const m = {}; RESP.forEach((r) => { const k = r.sch + "|" + r.ch; m[k] = m[k] || { s: r.sch, c: r.ch, open: 0, n: 0 }; m[k].open++; if (r.step === 5) m[k].n++; }); return Object.values(m).sort((a, b) => a.s.localeCompare(b.s)); };
+function svLinkView() {
+  return `<section class="card"><div class="card-head"><div><h2>Link khảo sát</h2><p>Mỗi trường và kênh phát có một link riêng để đo hiệu quả.</p></div><button class="btn sm primary" data-act="newlink">${ic("plus")} Tạo link</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Trường</th><th>Kênh</th><th>Link</th><th class="num">Lượt mở</th><th class="num">Phiếu</th><th></th></tr></thead>
+    <tbody>${svLinks().map((x) => { const url = `https://khaosat.example.com/s/${x.s.toLowerCase()}?utm_source=${x.c}`; return `<tr><td>${esc(schName(x.s))}</td><td>${x.c}</td><td class="mono">${url}</td><td class="num">${x.open}</td><td class="num">${x.n}</td><td><button class="btn sm" data-act="copylink" data-id="${url}">Sao chép</button></td></tr>`; }).join("")}</tbody></table></div></section>`;
+}
+function viewSurvey() {
+  const f = UI.sf;
+  const L = svFiltered();
+  const tabs = [["overview", "Tổng quan", 0], ["list", "Danh sách SV", 0], ["links", "Link khảo sát", svLinks().length]];
+  const evs = [...new Set(RESP.map((r) => r.ev).filter(Boolean))].map(evById);
+  const filters = `<div class="filters">
+    <select class="field" id="sv-sch" aria-label="Trường"><option value="">Mọi trường</option>${SV_SCHOOLS.map(([c, n]) => `<option value="${c}"${f.sch === c ? " selected" : ""}>${n}</option>`).join("")}</select>
+    <select class="field" id="sv-ch" aria-label="Kênh"><option value="">Mọi kênh</option>${SV_CH.map((c) => `<option${f.ch === c ? " selected" : ""}>${c}</option>`).join("")}</select>
+    <select class="field" id="sv-ev" aria-label="Sự kiện"><option value="">Mọi sự kiện</option>${evs.map((e) => `<option value="${e.id}"${f.ev === String(e.id) ? " selected" : ""}>${esc(e.name)}</option>`).join("")}</select>
+    <input class="field" type="date" id="sv-from" value="${f.from}" aria-label="Từ ngày"><input class="field" type="date" id="sv-to" value="${f.to}" aria-label="Đến ngày">
+    <button class="btn" data-act="svfilter">Lọc</button>${f.sch || f.ch || f.ev || f.from || f.to ? '<button class="btn" data-act="svclear">Bỏ lọc</button>' : ""}</div>`;
+  const body = UI.st === "overview" ? filters + svOverview(L) : UI.st === "list" ? filters + svList(L) : svLinkView();
+  return head("Khảo sát sinh viên", "Phiếu khảo sát tại trường, đồng bộ từ sheet kết quả mỗi 10 phút.",
+    `<button class="btn" data-act="sheet">${ic("sheet")} Mở sheet kết quả</button><button class="btn primary" data-act="csv">${ic("file")} Xuất CSV</button>`) +
+    `<div class="tabs">${tabs.map(([k, l, n]) => `<a href="#/khao-sat" data-ui="st=${k}"${UI.st === k ? ' aria-current="page"' : ""}>${l}${n ? `<span class="n">${n}</span>` : ""}</a>`).join("")}</div>${body}`;
+}
+
+/* ---------- Hiệu suất & Báo cáo ---------- */
+const MONTH_HIST = [3, 5, 8, 2, 9]; // 5 tháng trước tháng hiện tại, từ xa đến gần (dữ liệu giả)
+const WEEK_HIST = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [4, 0]]; // [đúng hạn, trễ hạn] 7 tuần trước
+const PLAN_INIT = () => ({ mou: 3, types: { "Ngày hội việc làm": 5, "Talkshow / Tọa đàm": 2, "Mini Jobfair": 1, "Lễ nhập học / Khai giảng": 1, "Lễ ký kết MOU": 1, "Khác": 1 } });
+let PLAN = PLAN_INIT();
+const monthName = (back) => { const d = new Date(T0.getFullYear(), T0.getMonth() - back, 1); return { m: d.getMonth() + 1, y: d.getFullYear(), d }; };
+function periodWindow() {
+  const y = T0.getFullYear(), m = T0.getMonth();
+  const off = (d) => Math.round((d.getTime() - T0.getTime()) / DAY);
+  if (UI.per === "prev") return { a: off(new Date(y, m - 1, 1)), b: off(new Date(y, m, 0)), months: 1, label: "Tháng trước" };
+  if (UI.per === "quarter") { const q = Math.floor(m / 3) * 3; return { a: off(new Date(y, q, 1)), b: off(new Date(y, q + 3, 0)), months: 3, label: "Quý này" }; }
+  if (UI.per === "6m") return { a: off(new Date(y, m - 5, 1)), b: off(new Date(y, m + 1, 0)), months: 6, label: "6 tháng" };
+  return { a: off(new Date(y, m, 1)), b: off(new Date(y, m + 1, 0)), months: 1, label: "Tháng này" };
+}
+function monthsInWindow(w) { const out = []; for (let back = 0; back < 6; back++) { const { d } = monthName(back); const o = Math.round((d.getTime() - T0.getTime()) / DAY); if (o >= w.a && o <= w.b) out.push(back); } return out; }
+const eventsInMonth = (back) => back === 0 ? EVENTS.filter((e) => dt(e.off).getMonth() === T0.getMonth()).length : MONTH_HIST[5 - back];
+function viewPerf() {
+  const w = periodWindow();
+  const backs = monthsInWindow(w);
+  const planEv = Object.values(PLAN.types).reduce((s, n) => s + n, 0) * w.months;
+  const planMou = PLAN.mou * w.months;
+  const evIn = EVENTS.filter((e) => e.off >= w.a && e.off <= w.b);
+  const held = evIn.filter((e) => e.off < 0 || e.status === "done").length + backs.filter((b) => b > 0).reduce((s, b) => s + MONTH_HIST[5 - b], 0);
+  const scheduled = backs.reduce((s, b) => s + eventsInMonth(b), 0);
+  const mouDone = PARTNERS.filter((p) => p.st === 5 && p.mou !== null && p.mou >= w.a && p.mou <= w.b).length;
+  const done = S.tasks.filter((t) => t.st === "done");
+  const onTime = done.filter((t) => t.id % 5 !== 0).length;
+  const sub = RESP.filter((r) => r.step === 5 && r.day >= w.a && r.day <= w.b);
+  const pastEv = evIn.filter((e) => e.off < 0);
+  const reported = pastEv.filter((e) => S.tasks.some((t) => t.ev === e.id && /Báo cáo/.test(t.title) && t.st === "done")).length;
+  const prog = (n, plan) => `<div class="mini" style="margin-top:8px"><i style="width:${Math.min(100, pct(n, plan))}%"></i></div>`;
+  const types = Object.keys(PLAN.types);
+  const byType = types.map((t) => [t, PLAN.types[t] * w.months, evIn.filter((e) => e.type === t).length, evIn.filter((e) => e.type === t && (e.off < 0 || e.status === "done")).length]);
+  const months = [5, 4, 3, 2, 1, 0];
+  const weeks = Array.from({ length: 8 }, (_, i) => 7 - i);
+  const thisWeek = [onTime, done.length - onTime];
+  const people = Object.keys(PEOPLE).map((k) => {
+    const mineAll = S.tasks.filter((t) => t.own === k);
+    const d = mineAll.filter((t) => t.st === "done");
+    const ot = d.filter((t) => t.id % 5 !== 0).length;
+    return { k, pic: k === ME ? EVENTS.length : 0, done: d.length, ot: pct(ot, d.length), open: mineAll.filter(isOpen).length, late: mineAll.filter((t) => isOpen(t) && due(t) < 0).length };
+  });
+  const ROLE = { HN: "Trưởng phòng", TT: "Event Marketing", DA: "Sale phụ trách trường", MC: "CTV vận hành" };
+  const perTabs = [["month", "Tháng này"], ["prev", "Tháng trước"], ["quarter", "Quý này"], ["6m", "6 tháng"]];
+  const tabs = [["perf", "Hiệu suất"], ["plan", "Kế hoạch tháng"]];
+  const { m, y } = monthName(0);
+  let body;
+  if (UI.perf === "perf") {
+    body = `<div class="segs">${perTabs.map(([k, l]) => `<button class="seg${UI.per === k ? " on" : ""}" data-ui="per=${k}" aria-pressed="${UI.per === k}">${l}</button>`).join("")}</div>
+    <section class="card"><div class="card-head"><div><h2>Kế hoạch ${w.label.toLowerCase()}</h2><p>Trường ký MOU và số lượng sự kiện so với kế hoạch lập đầu kỳ</p></div><button class="link" data-ui="perf=plan">Chi tiết kế hoạch →</button></div>
+      <div class="grid-eq card-pad">
+        <div class="plan"><div class="lbl">Trường ký MOU</div><div class="meta">theo sự kiện Lễ ký kết MOU</div><div class="num">${mouDone} <small>/ ${planMou}</small></div>${prog(mouDone, planMou)}<div class="sub"><b class="amber">${pct(mouDone, planMou)}% kế hoạch</b></div></div>
+        <div class="plan"><div class="lbl">Số lượng sự kiện</div><div class="meta">Ngày hội việc làm · Talkshow · Mini Jobfair · Khai giảng · Ký MOU</div><div class="num">${held} <small>/ ${planEv}</small></div>${prog(held, planEv)}<div class="sub"><b class="amber">${pct(held, planEv)}% kế hoạch</b> · còn ${Math.max(0, scheduled - held)} đã lên lịch</div></div>
+      </div>
+      <button class="link" style="margin:0 18px 14px" data-ui="ptype=${UI.ptype ? "0" : "1"}" aria-expanded="${UI.ptype}">${UI.ptype ? "Ẩn" : "Xem"} theo loại sự kiện ${UI.ptype ? "▴" : "▾"}</button>
+      ${UI.ptype ? `<div class="table-wrap"><table><thead><tr><th>Loại sự kiện</th><th class="num">Kế hoạch</th><th class="num">Đã lên lịch</th><th class="num">Đã tổ chức</th></tr></thead><tbody>${byType.map(([t, p, s, h]) => `<tr><td>${esc(t)}</td><td class="num">${p}</td><td class="num">${s}</td><td class="num">${h}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    </section>
+    <div class="stats s3">
+      ${STAT("#0f766e", "survey", "Khảo sát SV", sub.length, `${new Set(sub.map((r) => r.ev).filter(Boolean)).size} sự kiện có số liệu`)}
+      ${STAT("#b45309", "users", "Người dùng mới (NRU)", Math.round(sub.length * 0.04), `${pct(Math.round(sub.length * 0.04), 30)}% mục tiêu 30`)}
+      ${STAT("#0e7490", "file", "CV tải lên", Math.round(sub.length * 0.01), "từ link trong phiếu khảo sát")}
+    </div>
+    <div class="stats s5">
+      ${STAT("#0f766e", "event", "Sự kiện đã tổ chức", held, `${Math.max(0, scheduled - held)} sắp diễn ra trong kỳ`)}
+      ${STAT("#15803d", "check", "Việc hoàn thành", done.length, `${pct(onTime, done.length)}% đúng hạn`)}
+      ${STAT("#b45309", "clock", "Tỷ lệ đúng hạn", pct(onTime, done.length) + "%", `${done.length - onTime} việc trễ hạn`)}
+      ${STAT("#475569", "chart", "Chất lượng TB (việc duyệt)", "—", "0 việc được chấm")}
+      ${STAT("#be185d", "clip", "Báo cáo đã duyệt", `${reported}/${pastEv.length}`, "sự kiện đã qua · hạn 3 ngày")}
+    </div>
+    <div class="grid-eq">
+      <section class="card"><div class="card-head"><div><h2>Số sự kiện theo tháng</h2><p>6 tháng gần nhất, không tính sự kiện hủy</p></div></div>
+        <div class="card-pad">${barChart(months.map((b) => "T" + monthName(b).m), [{ name: "Sự kiện", color: "#0d9488", values: months.map(eventsInMonth) }], { label: "Số sự kiện theo tháng" })}</div></section>
+      <section class="card"><div class="card-head"><div><h2>Việc hoàn thành theo tuần</h2><p>8 tuần gần nhất, đúng hạn so với trễ hạn</p></div></div>
+        <div class="card-pad">${barChart(weeks.map((b) => dm(-b * 7 - ((T0.getDay() + 6) % 7))), [
+          { name: "Đúng hạn", color: "#0d9488", values: weeks.map((b) => (b === 0 ? thisWeek : WEEK_HIST[7 - b])[0]) },
+          { name: "Trễ hạn", color: "#d97706", values: weeks.map((b) => (b === 0 ? thisWeek : WEEK_HIST[7 - b])[1]) }], { label: "Việc hoàn thành theo tuần" })}</div></section>
+    </div>
+    <section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Hiệu suất nhân sự</h2><p>Việc xong, đúng hạn và điểm chất lượng tính trong kỳ; đang mở và quá hạn là hiện tại</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Nhân sự</th><th class="num">PIC sự kiện</th><th class="num">Việc xong</th><th>Đúng hạn</th><th>Chất lượng</th><th class="num">Đang mở</th><th class="num">Quá hạn</th><th>Đánh giá tại sự kiện</th></tr></thead>
+      <tbody>${people.map((p) => `<tr><td><span class="who">${av(p.k, true)}<span>${esc(PEOPLE[p.k].name)}<div class="meta">${ROLE[p.k]}</div></span></span></td><td class="num">${p.pic || "–"}</td><td class="num">${p.done}</td>
+        <td>${p.done ? `<div style="display:flex;align-items:center;gap:8px"><div class="mini" style="margin:0;min-width:70px"><i style="width:${p.ot}%"></i></div>${p.ot}%</div>` : "–"}</td><td>–</td><td class="num">${p.open}</td><td class="num"${p.late ? ' style="color:var(--red);font-weight:700"' : ""}>${p.late}</td><td>–</td></tr>`).join("")}</tbody></table></div></section>`;
+  } else {
+    body = `<section class="card"><div class="card-head"><div><h2>Kế hoạch tháng ${m}/${y}</h2><p>Nhập chỉ tiêu đầu tháng. Màn Hiệu suất tự so sánh với số sự kiện đã lên lịch và đã tổ chức.</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Chỉ tiêu</th><th class="num">Kế hoạch</th><th class="num">Đã lên lịch</th><th class="num">Đã tổ chức</th></tr></thead><tbody>
+      <tr><td><b style="font-weight:600">Trường ký MOU</b></td><td class="num"><input class="field num-in" type="number" min="0" data-plan="mou" value="${PLAN.mou}" aria-label="Kế hoạch trường ký MOU"></td><td class="num">${PARTNERS.filter((p) => p.st === 4).length} đang đàm phán</td><td class="num">${PARTNERS.filter((p) => p.st === 5 && p.mou !== null && dt(p.mou).getMonth() === T0.getMonth()).length}</td></tr>
+      ${types.map((t) => { const L = EVENTS.filter((e) => e.type === t && dt(e.off).getMonth() === T0.getMonth()); return `<tr><td>${esc(t)}</td><td class="num"><input class="field num-in" type="number" min="0" data-plan="${esc(t)}" value="${PLAN.types[t]}" aria-label="Kế hoạch ${esc(t)}"></td><td class="num">${L.length}</td><td class="num">${L.filter((e) => e.off < 0 || e.status === "done").length}</td></tr>`; }).join("")}
+      </tbody></table></div></section>`;
+  }
+  return head("Hiệu suất & Báo cáo", `Kỳ báo cáo: ${dm(w.a)} – ${dm(w.b)}/${dt(w.b).getFullYear()}`) +
+    `<div class="tabs">${tabs.map(([k, l]) => `<a href="#/hieu-suat" data-ui="perf=${k}"${UI.perf === k ? ' aria-current="page"' : ""}>${l}</a>`).join("")}</div>${body}`;
+}
+
+/* ---------- Tài liệu (bản đầy đủ) ---------- */
+const STD_FOLDERS = ["01. Kế hoạch & Proposal", "02. Ngân sách - PR & PM", "03. Hợp đồng & Pháp lý", "04. Thiết kế & Ấn phẩm", "05. Danh sách & Data", "06. Hình ảnh & Video", "07. Báo cáo sau sự kiện", "08. Tài liệu gửi Sale"];
+const DOC_SEED = [["Kế hoạch tổ chức sự kiện.pdf", 0], ["Proposal gửi trường.pdf", 0], ["Đề xuất ngân sách.xlsx", 1], ["Báo giá nhà cung cấp.pdf", 1], ["Biên bản xác nhận tài trợ.pdf", 2], ["Thư mời doanh nghiệp.png", 3], ["Sơ đồ gian hàng.png", 3], ["Standee chương trình.png", 3], ["Danh sách doanh nghiệp tham gia.xlsx", 4], ["Ảnh hiện trường.jpg", 5], ["Báo cáo kết quả sự kiện.docx", 6], ["Quyền lợi nhà tài trợ.pdf", 7]];
+const extOf = (n) => n.split(".").pop().toLowerCase();
+const fileRow = (name, meta, when) => `<div class="file"><span class="fi ${extOf(name)}">${ic("file")}</span><span class="f">${esc(name)}</span><small>${meta}</small><small class="when">${when}</small></div>`;
+function docGroups2() {
   const q = DF.q.trim().toLowerCase();
   return EVENTS.filter((e) => e.status !== "plan" || e.id % 2 === 0).sort((a, b) => b.off - a.off).map((e) => {
-    const n = 2 + ((e.id * 3) % 5);
-    const files = Array.from({ length: n }, (_, i) => { const name = DOCS[(e.id + i) % DOCS.length]; return { name, folder: (e.id + i) % FOLDERS.length, size: 120 + ((e.id * 37 + i * 91) % 900) }; })
+    const n = 1 + ((e.id * 3) % 6);
+    const files = Array.from({ length: n }, (_, i) => { const [name, folder] = DOC_SEED[(e.id * 2 + i) % DOC_SEED.length]; return { name, folder, size: 30 + ((e.id * 137 + i * 291) % 9000), age: (e.id + i * 2) % 24 }; })
       .filter((f) => (!q || f.name.toLowerCase().includes(q)) && (DF.folder === "" || String(f.folder) === DF.folder));
     return { e, files };
   }).filter((g) => g.files.length);
 }
+const kb = (n) => n >= 1000 ? (n / 1000).toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + " MB" : n + " KB";
 function docList() {
-  const gs = docGroups();
+  const gs = docGroups2();
   if (!gs.length) return '<div class="card"><p class="empty">Không tìm thấy tệp nào.</p></div>';
-  return gs.map(({ e, files }) => `<section class="docgroup"><h3>${dm(e.off)} · ${esc(e.name)}</h3><small>${files.length} tệp</small>
-    ${files.map((f) => { const ext = f.name.split(".").pop(); return `<div class="file"><span class="fi ${ext}">${ic("file")}</span><span class="f">${esc(f.name)}</span><small>${esc(FOLDERS[f.folder])} · ${f.size} KB</small></div>`; }).join("")}</section>`).join("");
+  return gs.map(({ e, files }) => `<section class="docgroup"><div class="dg-head"><div><h3>${dm(e.off)} · ${esc(e.name)}</h3><small>${files.length} tệp</small></div><button class="link" data-act="drive">Mở Drive ↗</button></div>
+    ${files.map((f) => fileRow(f.name, `${esc(STD_FOLDERS[f.folder].slice(4))} · ${kb(f.size)}`, ago(f.age))).join("")}</section>`).join("");
 }
+function docTree() {
+  const { m, y } = monthName(0);
+  const e = EVENTS.filter((x) => x.off >= 0).sort((a, b) => a.off - b.off)[0] || EVENTS[0];
+  const d = dt(e.off);
+  return `<aside class="card tree"><div class="card-head"><h2>Cấu trúc lưu trữ chuẩn</h2></div><ul class="tr">
+    <li>${ic("folder")} Sự kiện<ul><li>${ic("folder")} ${y}<ul><li>${ic("folder")} ${String(m).padStart(2, "0")}. Tháng ${m}<ul><li>${ic("folder")} ${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")} · ${esc(e.school)} · ${esc(e.name)}<ul>
+      ${STD_FOLDERS.map((f) => `<li>${ic("folder")} ${esc(f)}</li>`).join("")}</ul></li></ul></li></ul></li></ul></li>
+    <li>${ic("folder")} Thư viện chung</li></ul>
+    <p class="meta" style="padding:0 18px 16px">Thư mục được tạo tự động khi tạo sự kiện. Người trong đội vận hành được chia sẻ quyền tương ứng.</p></aside>`;
+}
+const LIB = [["Quy trình (SOP)", [["Quy trình tổ chức sự kiện tại trường.pdf", 420, 30], ["Quy trình đề xuất PR và thanh toán PM.pdf", 310, 44], ["Checklist chuẩn trước - trong - sau sự kiện.xlsx", 58, 12]]],
+  ["Mẫu biểu", [["Mẫu thư mời doanh nghiệp.docx", 36, 20], ["Mẫu đề xuất ngân sách.xlsx", 41, 20], ["Mẫu biên bản ký kết hợp tác.docx", 52, 61], ["Mẫu báo cáo sau sự kiện.docx", 47, 9]]],
+  ["Ấn phẩm dùng chung", [["Bộ khung standee và backdrop.pdf", 8800, 90], ["Hồ sơ năng lực doanh nghiệp.pdf", 5400, 15]]]];
 function viewDocs() {
-  const tabs = [["ev", "Theo sự kiện"], ["school", "Hồ sơ trường và MOU"], ["lib", "Thư viện chung (SOP, mẫu biểu)"]];
-  const body = DF.tab === "ev" ? `<div class="filters"><input class="field" id="df-q" type="search" placeholder="Tìm theo tên tệp..." value="${esc(DF.q)}" aria-label="Tìm tệp" style="min-width:240px">
-      <select class="field" id="df-folder" aria-label="Thư mục"><option value="">Mọi thư mục</option>${FOLDERS.map((f, i) => `<option value="${i}"${DF.folder === String(i) ? " selected" : ""}>${f}</option>`).join("")}</select></div><div id="doclist">${docList()}</div>`
-    : '<div class="card"><p class="stub">Mục này chưa có trong bản demo.</p></div>';
+  const tabs = [["ev", "Theo sự kiện"], ["school", "Hồ sơ trường & MOU"], ["lib", "Thư viện chung (SOP, mẫu biểu)"]];
+  let main;
+  if (DF.tab === "ev") main = `<div class="filters"><input class="field" id="df-q" type="search" placeholder="Tìm theo tên tệp..." value="${esc(DF.q)}" aria-label="Tìm tệp" style="min-width:220px">
+      <select class="field" id="df-folder" aria-label="Thư mục"><option value="">Mọi thư mục</option>${STD_FOLDERS.map((f, i) => `<option value="${i}"${DF.folder === String(i) ? " selected" : ""}>${f}</option>`).join("")}</select></div><div id="doclist">${docList()}</div>`;
+  else if (DF.tab === "school") main = PARTNERS.filter((p) => p.st >= 3 && p.st <= 5).map((p) => `<section class="docgroup"><div class="dg-head"><div><h3>${esc(p.name)}</h3><small>${P_STATUS[p.st][0]}</small></div><button class="link" data-act="drive">Mở Drive ↗</button></div>
+      ${fileRow("Hồ sơ năng lực gửi trường.pdf", "Hồ sơ trường · 5,4 MB", ago(10 + p.id))}${p.st >= 4 ? fileRow(`Dự thảo MOU - ${p.code}.docx`, "MOU · 48 KB", ago(p.id % 6)) : ""}${p.st === 5 ? fileRow(`MOU đã ký - ${p.code}.pdf`, "MOU · 1,2 MB", p.mou !== null ? ago(-p.mou) : "–") : ""}</section>`).join("");
+  else main = LIB.map(([g, files]) => `<section class="docgroup"><div class="dg-head"><div><h3>${g}</h3><small>${files.length} tệp</small></div><button class="link" data-act="drive">Mở Drive ↗</button></div>${files.map(([n, s, a]) => fileRow(n, kb(s), ago(a))).join("")}</section>`).join("");
   return head("Tài liệu", "Danh sách tệp đồng bộ từ Google Drive. Mỗi sự kiện có cùng một cấu trúc thư mục chuẩn.", `<button class="btn" data-act="drive">${ic("folder")} Thư mục gốc trên Drive</button>`) +
-    `<div class="tabs">${tabs.map(([k, l]) => `<a href="#/tai-lieu" data-dtab="${k}"${DF.tab === k ? ' aria-current="page"' : ""}>${l}</a>`).join("")}</div>${body}`;
+    `<div class="tabs">${tabs.map(([k, l]) => `<a href="#/tai-lieu" data-dtab="${k}"${DF.tab === k ? ' aria-current="page"' : ""}>${l}</a>`).join("")}</div><div class="docs-grid"><div>${main}</div>${docTree()}</div>`;
 }
 
-const STUBS = { "lich": "Lịch", "doi-tac": "Đối tác & Trường", "brief-sale": "Brief Sale", "khao-sat": "Khảo sát SV", "hieu-suat": "Hiệu suất & Báo cáo", "nhan-su": "Nhân sự", "nguoi-dung": "Người dùng", "mau-checklist": "Mẫu checklist", "ket-noi": "Kết nối Google" };
+const STUBS = { "lich": "Lịch", "brief-sale": "Brief Sale", "nhan-su": "Nhân sự", "nguoi-dung": "Người dùng", "mau-checklist": "Mẫu checklist", "ket-noi": "Kết nối Google" };
 const viewStub = (key) => head(STUBS[key], "") + '<div class="card"><p class="stub">Màn hình này chưa có trong bản demo.</p></div>';
 
 /* ---------- Điều hướng và vẽ ---------- */
@@ -762,6 +1137,9 @@ function render(focus) {
   else if (r.page === "cong-viec") html = viewTasks();
   else if (r.page === "ngan-sach") html = viewBudget();
   else if (r.page === "tai-lieu") html = viewDocs();
+  else if (r.page === "doi-tac") html = viewPartners();
+  else if (r.page === "khao-sat") html = viewSurvey();
+  else if (r.page === "hieu-suat") html = viewPerf();
   else if (STUBS[r.page]) html = viewStub(r.page);
   else html = head("Không tìm thấy trang", "") + '<p><a class="link" href="#/tong-quan">← Về Tổng quan</a></p>';
   $("#main").innerHTML = html;
@@ -777,7 +1155,7 @@ const log = (text, ev) => S.activity.unshift({ who: "Hoàng Nam", text, ev, ago:
 
 const TEMPLATE = [["truoc", "Chốt kịch bản và timeline", -10], ["truoc", "Xác nhận nhà cung cấp", -7], ["truoc", "Gửi thư mời và xác nhận khách mời", -5], ["trong", "Onsite sự kiện", 0], ["sau", "Lên bài biết hậu sự kiện", 2], ["sau", "Báo cáo kết quả sự kiện", 4]];
 const ACTIONS = {
-  reset() { S = SEED(); EF.tab = "sap"; EF.q = ""; EF.area = ""; EF.pic = ""; TF.tab = "mine"; TF.status = "open"; TF.ev = ""; DF.q = ""; DF.folder = ""; toast("Đã đặt lại dữ liệu mẫu"); },
+  reset() { S = SEED(); PARTNERS = PARTNERS_INIT(); PLAN = PLAN_INIT(); Object.assign(UI, { pt: "list", pq: "", parea: "", ppic: "", st: "overview", sf: { sch: "", ch: "", ev: "", from: "", to: "" }, perf: "perf", per: "month", ptype: false }); EF.tab = "sap"; EF.q = ""; EF.area = ""; EF.pic = ""; TF.tab = "mine"; TF.status = "open"; TF.ev = ""; DF.q = ""; DF.folder = ""; toast("Đã đặt lại dữ liệu mẫu"); },
   create() { toast("Tạo sự kiện (demo, chưa có biểu mẫu)"); },
   import() { toast("Nhập từ sheet (demo, chưa kết nối sheet thật)"); },
   sheet() { toast("Mở sheet (demo, chưa kết nối sheet thật)"); },
@@ -801,6 +1179,39 @@ const ACTIONS = {
     toast("Đã thêm việc mới");
   }
 };
+
+Object.assign(ACTIONS, {
+  yearplan() { toast("Kế hoạch năm (demo, chưa có biểu mẫu)"); },
+  addschool() { toast("Thêm trường (demo, chưa có biểu mẫu)"); },
+  newlink() { toast("Tạo link khảo sát (demo)"); },
+  pmove(id, el) { const p = PARTNERS.find((x) => x.id === id); const to = Math.max(0, Math.min(P_STATUS.length - 1, p.st + Number(el.dataset.dir))); log(`${p.name}: ${P_STATUS[p.st][0]} → ${P_STATUS[to][0]}`, 0); p.st = to; if (to === 5 && p.mou === null) p.mou = 0; toast(`${p.name}: ${P_STATUS[to][0]}`); },
+  svfilter() { UI.sf = { sch: $("#sv-sch").value, ch: $("#sv-ch").value, ev: $("#sv-ev").value, from: $("#sv-from").value, to: $("#sv-to").value }; },
+  svclear() { UI.sf = { sch: "", ch: "", ev: "", from: "", to: "" }; },
+  copylink(url) { try { navigator.clipboard.writeText(url); } catch (e) { /* trình duyệt không cho phép */ } toast("Đã sao chép link khảo sát"); },
+  csv() {
+    const rows = [["Ngày", "Họ tên", "Trường", "Ngành", "Năm sinh", "Kênh", "Bấm tải app"]].concat(svFiltered().filter((r) => r.step === 5).map((r) => [dmy(r.day), r.name, schName(r.sch), r.major, r.by, r.ch, r.app ? "Có" : "Không"]));
+    const text = "\ufeff" + rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" })); a.download = "khao-sat-demo.csv"; a.click(); toast(`Đã xuất ${rows.length - 1} phiếu ra CSV`); } catch (e) { toast("Trình duyệt không cho tải tệp"); }
+  }
+});
+document.addEventListener("click", (e) => {
+  const u = e.target.closest("[data-ui]");
+  if (!u) return;
+  e.preventDefault();
+  const [k, v] = u.dataset.ui.split("=");
+  UI[k] = k === "ptype" ? v === "1" : v;
+  render();
+});
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.dataset.pstatus) { const p = PARTNERS.find((x) => x.id === Number(t.dataset.pstatus)); const to = Number(t.value); log(`${p.name}: ${P_STATUS[p.st][0]} → ${P_STATUS[to][0]}`, 0); p.st = to; if (to === 5 && p.mou === null) p.mou = 0; toast(`${p.name}: ${P_STATUS[to][0]}`); render(); }
+  else if (t.id === "pf-area") { UI.parea = t.value; $("#pbody").innerHTML = partnerRows(); }
+  else if (t.id === "pf-pic") { UI.ppic = t.value; $("#pbody").innerHTML = partnerRows(); }
+  else if (t.dataset.plan) { const n = Math.max(0, Number(t.value) || 0); if (t.dataset.plan === "mou") PLAN.mou = n; else PLAN.types[t.dataset.plan] = n; toast("Đã lưu kế hoạch tháng"); }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id === "pf-q") { UI.pq = e.target.value; $("#pbody").innerHTML = partnerRows(); }
+});
 
 document.addEventListener("click", (e) => {
   const tab = e.target.closest("[data-etab],[data-ttab],[data-btab],[data-dtab]");
